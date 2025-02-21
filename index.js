@@ -12,6 +12,7 @@ const CHAT_ID = process.env.CHAT_ID;
 const FETCH_URL_1 = process.env.FETCH_URL_1;
 const FETCH_URL_2 = process.env.FETCH_URL_2;
 const FETCH_URL_3 = process.env.FETCH_URL_3;
+const REPORT_LINK = process.env.REPORT_LINK;
 
 const SELF_URL = process.env.SELF_URL;
 const PORT = process.env.PORT || 3000;
@@ -118,20 +119,21 @@ cron.schedule('1 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
 
             const formattedDate = reportDate.toFormat("dd-MM-yy HH:00");
 
-            // 5. Отправка сообщения
 const message = `
 📅 ${formattedDate}
 
+🔹 <b>eclipsebet.com:</b> 
 ${Report_1}
-[🔗 Полный отчет](https://eclservice.org/reports)
+<a href="${REPORT_LINK}">🔗 Полный отчет</a>
 
-🔹 moyobet.ke: 
+🔹 <b>moyobet.ke:</b> 
 ${Report_2}
 
-🔹 moyobet.com: 
+🔹 <b>moyobet.com:</b> 
 ${Report_3}`;
-            
-            bot.telegram.sendMessage(CHAT_ID, message);
+
+bot.telegram.sendMessage(CHAT_ID, message, { parse_mode: "HTML" });
+		
         }, 5000);
     } catch (error) {
         console.error(`Ошибка при получении отчёта:`, error.message);
