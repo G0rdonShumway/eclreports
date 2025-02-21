@@ -55,6 +55,10 @@ bot.command('test', (ctx) => {
     ctx.reply('Бот может отправлять сообщения!');
 });
 
+bot.command('link', (ctx) => {
+    ctx.reply('🔗 <a href="https://eclservice.org/reports">Полный отчет</a><br><br>')
+});
+
 // Получение Chat ID
 bot.command('id', (ctx) => {
     console.log(`Chat ID: ${ctx.chat.id}`);
