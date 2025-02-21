@@ -76,44 +76,55 @@ async function fetchReport(url) {
 	}
 }
 
-cron.schedule('* * * * *', () => {
-  console.log('running a task every minute');
+// Запрос к API и БД каждую первую минуту нечетного часа
+cron.schedule('1 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
+    try {
+        // 1. Запрос к API
+        fetchReport(FETCH_URL);
+
+        // 2. Запрос к БД
+        const reports = await queryDatabase(
+            'SELECT Report, DateTime FROM `interval_reports` ORDER BY ID DESC LIMIT 1'
+        );
+
+        if (!reports || reports.length === 0) {
+            return bot.telegram.sendMessage(CHAT_ID, 'Нет отчета.');
+        }
+
+        // 3. Формирование и отправка сообщения
+        const { Report, DateTime } = reports[0];
+        const message = `📅 ${DateTime}\n${Report}\nhttps://eclservice.org/reports}`;
+        
+        bot.telegram.sendMessage(CHAT_ID, message);
+    } catch (error) {
+        console.error(`Ошибка при получении отчёта:`, error.message);
+    }
+},{
+   scheduled: true,
+   timezone: "Asia/Tbilisi"
 });
 
-// Запрос к API и БД каждую первую минуту нечетного часа
-// cron.schedule('1 1-23/2 * * *', async () => {
-//     try {
-//         // 1. Запрос к API
-//         fetchReport(FETCH_URL);
-
-//         // 2. Запрос к БД
-//         const reports = await queryDatabase(
-//             'SELECT Report, DateTime FROM `interval_reports` ORDER BY ID DESC LIMIT 1'
-//         );
-
-//         if (!reports || reports.length === 0) {
-//             return bot.telegram.sendMessage(CHAT_ID, 'Нет отчета.');
-//         }
-
-//         // 3. Формирование и отправка сообщения
-//         const { Report, DateTime } = reports[0];
-//         const message = `📅 ${DateTime}\n${Report}\nhttps://eclservice.org/reports}`;
-        
-//         bot.telegram.sendMessage(CHAT_ID, message);
-//     } catch (error) {
-//         console.error(`Ошибка при получении отчёта:`, error.message);
-//     }
-// });
-
-// Пингует бота каждые 10 минут, чтобы Render не засыпал
-setInterval(async () => {
+cron.schedule('5 * * * *', async () => {
     try {
         await bot.telegram.sendMessage(CHAT_ID, 'Пинг 🟢');
         console.log(`Пинг отправлен`);
     } catch (error) {
         console.error('Ошибка пинга:', error);
     }
-}, 600000);
+}, {
+   scheduled: true,
+   timezone: "Asia/Tbilisi"
+});
+
+// Пингует бота каждые 10 минут, чтобы Render не засыпал
+// setInterval(async () => {
+//     try {
+//         await bot.telegram.sendMessage(CHAT_ID, 'Пинг 🟢');
+//         console.log(`Пинг отправлен`);
+//     } catch (error) {
+//         console.error('Ошибка пинга:', error);
+//     }
+// }, 600000);
 
 // Запуск Express сервера
 app.listen(PORT, () => {
