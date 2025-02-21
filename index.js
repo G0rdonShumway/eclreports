@@ -78,9 +78,9 @@ async function fetchReport(url) {
 }
 
 // Запрос к API и БД каждую первую минуту нечетного часа
-cron.schedule('1 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
+cron.schedule('1 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
     try {
-        fetchReport(FETCH_URL);
+        await fetchReport(FETCH_URL);
 
         setTimeout(async () => {
             // Используем Luxon для работы с часовым поясом
