@@ -77,32 +77,40 @@ async function fetchReport(url) {
 }
 
 // Запрос к API и БД каждую первую минуту нечетного часа
-cron.schedule('1 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
+cron.schedule('0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
     try {
         // 1. Запрос к API
         fetchReport(FETCH_URL);
 
-        // 2. Запрос к БД
-        const reports = await queryDatabase(
-            'SELECT Report, DateTime FROM `interval_reports` ORDER BY ID DESC LIMIT 1'
-        );
+        setTimeout(async () => {
+            // 2. Запрос к БД
+            const reports = await queryDatabase(
+                'SELECT Report, DateTime FROM `interval_reports` ORDER BY ID DESC LIMIT 1'
+            );
 
-        if (!reports || reports.length === 0) {
-            return bot.telegram.sendMessage(CHAT_ID, 'Нет отчета.');
-        }
+            if (!reports || reports.length === 0) {
+                return bot.telegram.sendMessage(CHAT_ID, 'Нет отчета.');
+            }
 
-        // 3. Формирование и отправка сообщения
-        const { Report, DateTime } = reports[0];
-        const message = `📅 ${DateTime}\n${Report}\nhttps://eclservice.org/reports}`;
-        
-        bot.telegram.sendMessage(CHAT_ID, message);
+            // 3. Формирование даты в нужном формате
+            const { Report, DateTime } = reports[0];
+            const dateObj = new Date(DateTime);
+
+            const formattedDate = `${String(dateObj.getDate()).padStart(2, '0')}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getFullYear()).slice(-2)} ${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
+
+            // 4. Формирование и отправка сообщения
+            const message = `📅 ${formattedDate}\n${Report}\nhttps://eclservice.org/reports`;
+            
+            bot.telegram.sendMessage(CHAT_ID, message);
+        }, 5000);
     } catch (error) {
         console.error(`Ошибка при получении отчёта:`, error.message);
     }
-},{
-   scheduled: true,
-   timezone: "Asia/Tbilisi"
+}, {
+    scheduled: true,
+    timezone: "Asia/Tbilisi"
 });
+
 
 cron.schedule('*/5 * * * *', async () => {
     try {
