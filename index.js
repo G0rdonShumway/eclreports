@@ -36,7 +36,7 @@ cron.schedule('1 1-23/2 * * *', async () => {
 setInterval(async () => {
     try {
         await fetch(SELF_URL);
-        console.log('Пинг отправлен');
+        await bot.telegram.sendMessage(CHAT_ID, `Пинг отправлен`);
     } catch (error) {
         console.error('Ошибка пинга:', error);
     }
