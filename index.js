@@ -56,8 +56,8 @@ bot.command('test', (ctx) => {
     ctx.reply('Бот может отправлять сообщения!');
 });
 
-bot.command('link', (ctx) => {
-    ctx.reply("<a href="${REPORT_LINK}">🔗 Полный отчет</a>", parse_mode="HTML")
+bot.command("link", (ctx) => {
+    ctx.reply(`<a href="${REPORT_LINK}">🔗 Полный отчет</a>`, { parse_mode: "HTML" });
 });
 
 // Получение Chat ID
