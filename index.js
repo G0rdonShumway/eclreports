@@ -117,8 +117,8 @@ cron.schedule('1 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
             // 5. Отправка сообщения
 const message = `
 📅 ${formattedDate}
-${Report_1}
 
+${Report_1}
 🔗 [Полный отчет](https://eclservice.org/reports)
 
 🔹 moyobet.ke: 
