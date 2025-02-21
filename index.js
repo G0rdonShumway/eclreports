@@ -29,6 +29,7 @@ bot.command('id', async (ctx) => {
     console.log(`Chat ID: ${ctx.chat.id}`);
     ctx.reply(`Ваш Chat ID: ${ctx.chat.id}`);
 });
+
 // Запрос к API каждую первую минуту нечетного часа
 cron.schedule('1 1-23/2 * * *', async () => {
     try {
@@ -49,7 +50,7 @@ setInterval(async () => {
     } catch (error) {
         console.error('Ошибка пинга:', error);
     }
-}, 10 * 60 * 1000);
+}, 60000);
 
 // Запускаем Express сервер
 const PORT = process.env.PORT || 3000;
