@@ -3,6 +3,7 @@ const { Telegraf } = require('telegraf');
 const fetch = require('node-fetch');
 const cron = require('node-cron');
 const express = require('express');
+const axios = require('axios');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const CHAT_ID = process.env.CHAT_ID;
@@ -33,11 +34,15 @@ bot.command('id', async (ctx) => {
 // Запрос к API каждую первую минуту нечетного часа
 cron.schedule('1 1-23/2 * * *', async () => {
     try {
-        const response = await fetch(FETCH_URL);
-        const data = await response.text();
-        await bot.telegram.sendMessage(CHAT_ID, `Данные с сервера:\n${data.substring(0, 4000)}`);
+        const response = await axios.post(FETCH_URL, {}, {
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        console.log(response.data);
+        await bot.telegram.sendMessage(CHAT_ID, `${FETCH_URL}: отчет готов`);
     } catch (error) {
-        console.error('Ошибка запроса:', error);
+        console.error(`Error fetching report:`, error.message);
     }
 });
 
