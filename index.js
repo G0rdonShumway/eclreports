@@ -4,6 +4,7 @@ const axios = require('axios');
 const cron = require('node-cron');
 const express = require('express');
 const mysql = require('mysql2/promise');
+const { DateTime } = require('luxon'); // Добавляем библиотеку Luxon
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const CHAT_ID = process.env.CHAT_ID;
@@ -77,13 +78,21 @@ async function fetchReport(url) {
 }
 
 // Запрос к API и БД каждую первую минуту нечетного часа
-cron.schedule('0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
+cron.schedule('1 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
     try {
-        // 1. Запрос к API
         fetchReport(FETCH_URL);
 
         setTimeout(async () => {
-            // 2. Запрос к БД
+            // Используем Luxon для работы с часовым поясом
+            let now = DateTime.now().setZone("Asia/Tbilisi");
+            let reportDate = now;
+
+            if (now.hour === 1) {
+                // Если запрос в 01:00, берём вчерашнюю дату
+                reportDate = now.minus({ days: 1 });
+            }
+
+            // 3. Запрос к БД
             const reports = await queryDatabase(
                 'SELECT Report, DateTime FROM `interval_reports` ORDER BY ID DESC LIMIT 1'
             );
@@ -92,13 +101,12 @@ cron.schedule('0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
                 return bot.telegram.sendMessage(CHAT_ID, 'Нет отчета.');
             }
 
-            // 3. Формирование даты в нужном формате
-            const { Report, DateTime } = reports[0];
-            const dateObj = new Date(DateTime);
+            // 4. Форматирование даты
+            const { Report } = reports[0];
 
-            const formattedDate = `${String(dateObj.getDate()).padStart(2, '0')}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getFullYear()).slice(-2)} ${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
+            const formattedDate = reportDate.toFormat("dd-MM-yy HH:00");
 
-            // 4. Формирование и отправка сообщения
+            // 5. Отправка сообщения
             const message = `📅 ${formattedDate}\n${Report}\nhttps://eclservice.org/reports`;
             
             bot.telegram.sendMessage(CHAT_ID, message);
