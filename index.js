@@ -8,7 +8,11 @@ const { DateTime } = require('luxon'); // Добавляем библиотек�
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const CHAT_ID = process.env.CHAT_ID;
-const FETCH_URL = process.env.FETCH_URL;
+
+const FETCH_URL_1 = process.env.FETCH_URL_1;
+const FETCH_URL_2 = process.env.FETCH_URL_2;
+const FETCH_URL_3 = process.env.FETCH_URL_3;
+
 const SELF_URL = process.env.SELF_URL;
 const PORT = process.env.PORT || 3000;
 
@@ -80,7 +84,9 @@ async function fetchReport(url) {
 // Запрос к API и БД каждую первую минуту нечетного часа
 cron.schedule('1 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
     try {
-        await fetchReport(FETCH_URL);
+        await fetchReport(FETCH_URL_1);
+        await fetchReport(FETCH_URL_2);
+        await fetchReport(FETCH_URL_3);
 
         setTimeout(async () => {
             // Используем Luxon для работы с часовым поясом
@@ -93,21 +99,33 @@ cron.schedule('1 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
             }
 
             // 3. Запрос к БД
-            const reports = await queryDatabase(
-                'SELECT Report, DateTime FROM `interval_reports` ORDER BY ID DESC LIMIT 1'
-            );
+            const reports_1 = await queryDatabase('SELECT Report, DateTime FROM `interval_reports` ORDER BY ID DESC LIMIT 1');
+            const reports_2 = await queryDatabase('SELECT Report, DateTime FROM `interval_reports_moyo_ke` ORDER BY ID DESC LIMIT 1');
+            const reports_3 = await queryDatabase('SELECT Report, DateTime FROM `interval_reports_moyo_com` ORDER BY ID DESC LIMIT 1');
 
-            if (!reports || reports.length === 0) {
+            if (!reports_1 || reports_1.length === 0) {
                 return bot.telegram.sendMessage(CHAT_ID, 'Нет отчета.');
             }
 
             // 4. Форматирование даты
-            const { Report } = reports[0];
+            const { Report_1 } = reports_1[0];
+            const { Report_2 } = reports_2[0];
+            const { Report_3 } = reports_3[0];
 
             const formattedDate = reportDate.toFormat("dd-MM-yy HH:00");
 
             // 5. Отправка сообщения
-            const message = `📅 ${formattedDate}\n${Report}\nhttps://eclservice.org/reports`;
+const message = `
+📅 ${formattedDate}
+${Report_1}
+
+🔗 [Полный отчет](https://eclservice.org/reports)
+
+🔹 moyobet.ke: 
+${Report_2}
+
+🔹 moyobet.com: 
+${Report_3}`;
             
             bot.telegram.sendMessage(CHAT_ID, message);
         }, 5000);
