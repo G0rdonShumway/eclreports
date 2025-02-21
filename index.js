@@ -21,6 +21,9 @@ app.get('/', (req, res) => {
     res.send('Бот работает!');
 });
 
+bot.command('test', async (ctx) => {
+    ctx.reply('Бот может отправлять сообщения!');
+});
 // Запрос к API каждую первую минуту нечетного часа
 cron.schedule('1 1-23/2 * * *', async () => {
     try {
