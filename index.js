@@ -91,7 +91,7 @@ setInterval(async () => {
     } catch (error) {
         console.error('Ошибка пинга:', error);
     }
-}, 60000);
+}, 600000);
 
 // Запускаем Express сервер
 const PORT = process.env.PORT || 3000;
