@@ -24,6 +24,11 @@ app.get('/', (req, res) => {
 bot.command('test', async (ctx) => {
     ctx.reply('Бот может отправлять сообщения!');
 });
+
+bot.command('id', async (ctx) => {
+    console.log(`Chat ID: ${ctx.chat.id}`);
+    ctx.reply(`Ваш Chat ID: ${ctx.chat.id}`);
+});
 // Запрос к API каждую первую минуту нечетного часа
 cron.schedule('1 1-23/2 * * *', async () => {
     try {
@@ -39,6 +44,7 @@ cron.schedule('1 1-23/2 * * *', async () => {
 setInterval(async () => {
     try {
         await fetch(SELF_URL);
+        console.log(`Пинг отправлен: ${SELF_URL}`);
         await bot.telegram.sendMessage(CHAT_ID, `Пинг отправлен`);
     } catch (error) {
         console.error('Ошибка пинга:', error);
