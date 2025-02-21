@@ -108,9 +108,9 @@ cron.schedule('1 5 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
             }
 
             // 4. Форматирование даты
-            const { Report_1 } = reports_1[0];
-            const { Report_2 } = reports_2[0];
-            const { Report_3 } = reports_3[0];
+		const { Report: Report_1 } = reports_1[0];
+		const { Report: Report_2 } = reports_2[0] || { Report: "Нет данных" };
+		const { Report: Report_3 } = reports_3[0] || { Report: "Нет данных" };
 
             const formattedDate = reportDate.toFormat("dd-MM-yy HH:00");
 
