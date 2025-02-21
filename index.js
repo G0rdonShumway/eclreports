@@ -104,7 +104,7 @@ cron.schedule('1 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
    timezone: "Asia/Tbilisi"
 });
 
-cron.schedule('5 * * * *', async () => {
+cron.schedule('*/5 * * * *', async () => {
     try {
         await bot.telegram.sendMessage(CHAT_ID, 'Пинг 🟢');
         console.log(`Пинг отправлен`);
