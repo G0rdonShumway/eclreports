@@ -115,7 +115,7 @@ cron.schedule('0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
 cron.schedule('*/5 * * * *', async () => {
     try {
         await fetch(SELF_URL);
-        await bot.telegram.sendMessage(CHAT_ID, 'Пинг 🟢');
+        // await bot.telegram.sendMessage(CHAT_ID, 'Пинг 🟢');
         console.log(`Пинг отправлен`);
     } catch (error) {
         console.error('Ошибка пинга:', error);
