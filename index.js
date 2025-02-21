@@ -56,7 +56,7 @@ bot.command('test', (ctx) => {
 });
 
 bot.command('link', (ctx) => {
-    ctx.reply('[🔗 Полный отчет](https://eclservice.org/reports)')
+    ctx.reply("[🔗 Полный отчет](https://eclservice.org/reports)", parse_mode="MarkdownV2")
 });
 
 // Получение Chat ID
