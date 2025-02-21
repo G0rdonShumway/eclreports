@@ -82,7 +82,7 @@ async function fetchReport(url) {
 }
 
 // Запрос к API и БД каждую первую минуту нечетного часа
-cron.schedule('1 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
+cron.schedule('1 5 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
     try {
         await fetchReport(FETCH_URL_1);
         await fetchReport(FETCH_URL_2);
@@ -100,8 +100,8 @@ cron.schedule('1 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
 
             // 3. Запрос к БД
             const reports_1 = await queryDatabase('SELECT Report, DateTime FROM `interval_reports` ORDER BY ID DESC LIMIT 1');
-            const reports_2 = await queryDatabase('SELECT Report, DateTime FROM `interval_reports_moyo_ke` ORDER BY ID DESC LIMIT 1');
-            const reports_3 = await queryDatabase('SELECT Report, DateTime FROM `interval_reports_moyo_com` ORDER BY ID DESC LIMIT 1');
+            const reports_2 = await queryDatabase('SELECT Report, DateTime FROM `moyo_ke_interval_reports` ORDER BY ID DESC LIMIT 1');
+            const reports_3 = await queryDatabase('SELECT Report, DateTime FROM `moyo_com_interval_reports` ORDER BY ID DESC LIMIT 1');
 
             if (!reports_1 || reports_1.length === 0) {
                 return bot.telegram.sendMessage(CHAT_ID, 'Нет отчета.');
