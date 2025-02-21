@@ -86,7 +86,7 @@ async function fetchReport(url) {
 }
 
 // Запрос к API и БД каждую первую минуту нечетного часа
-cron.schedule('1 10 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
+cron.schedule('1 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
     try {
         await fetchReport(FETCH_URL_1);
         await fetchReport(FETCH_URL_2);
@@ -123,7 +123,7 @@ const message = `
 📅 ${formattedDate}
 
 ${Report_1}
-🔗 [Полный отчет](https://eclservice.org/reports)
+🔗 <a href="https://eclservice.org/reports">Полный отчет</a><br><br>
 
 🔹 moyobet.ke: 
 ${Report_2}
