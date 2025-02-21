@@ -56,7 +56,7 @@ bot.command('test', (ctx) => {
 });
 
 bot.command('link', (ctx) => {
-    ctx.reply('🔗 <a href="https://eclservice.org/reports">Полный отчет</a><br><br>')
+    ctx.reply('🔗 [Полный отчет](https:\\/\\/eclservice.org\\/reports)')
 });
 
 // Получение Chat ID
@@ -123,7 +123,7 @@ const message = `
 📅 ${formattedDate}
 
 ${Report_1}
-🔗 <a href="https://eclservice.org/reports">Полный отчет</a><br><br>
+🔗 [Полный отчет](https:\\/\\/eclservice.org\\/reports)
 
 🔹 moyobet.ke: 
 ${Report_2}
