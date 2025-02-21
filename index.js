@@ -56,12 +56,31 @@ bot.command('id', (ctx) => {
     ctx.reply(`Ваш Chat ID: ${ctx.chat.id}`);
 });
 
+async function fetchReport(url) {
+	try {
+		const response = await fetch(url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			}
+		});
+
+		if (!response.ok) {
+			throw new Error('Network response was not ok');
+		}
+
+		const data = await response.json();
+		console.log(data);
+	} catch (error) {
+		console.error(`Ошибка запроса:`, error);
+	}
+}
+
 // Запрос к API и БД каждую первую минуту нечетного часа
 cron.schedule('1 1-23/2 * * *', async () => {
     try {
         // 1. Запрос к API
-        const response = await axios.post(FETCH_URL, {}, { headers: { 'Content-Type': 'application/json' } });
-        console.log(response.data);
+        fetchReport(FETCH_URL);
 
         // 2. Запрос к БД
         const reports = await queryDatabase(
@@ -74,7 +93,7 @@ cron.schedule('1 1-23/2 * * *', async () => {
 
         // 3. Формирование и отправка сообщения
         const { Report, DateTime } = reports[0];
-        const message = `📅 ${DateTime}\n${Report}`;
+        const message = `📅 ${DateTime}\n${Report}\nhttps://eclservice.org/reports}`;
         
         bot.telegram.sendMessage(CHAT_ID, message);
     } catch (error) {
