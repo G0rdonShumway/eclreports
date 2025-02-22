@@ -121,16 +121,16 @@ cron.schedule('1 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
 
 const message = `
 📅 ${formattedDate}
-
-🔹 <b>eclipsebet.com:</b> 
+🔹<b>eclipsebet com:</b> 
 ${Report_1}
-<a href="${REPORT_LINK}">🔗 Полный отчет</a>
 
-🔹 <b>moyobet.ke:</b> 
+🔹<b>moyobet ke:</b> 
 ${Report_2}
 
-🔹 <b>moyobet.com:</b> 
-${Report_3}`;
+🔹<b>moyobet com:</b> 
+${Report_3}
+
+<a href="${REPORT_LINK}">🔗Смотреть полный отчет</a>`;
 
 bot.telegram.sendMessage(CHAT_ID, message, { parse_mode: "HTML" });
 		
