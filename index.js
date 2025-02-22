@@ -90,10 +90,10 @@ async function fetchAndSendReport() {
         const formattedDate = reportDate.toFormat("dd-MM-yy HH:00");
 
 	function formatNumbers(report) {
-            return report.replace(/\b\d{1,3}(?=(\d{3})+(?!\d))/g, (match) =>
-                Number(match).toLocaleString("en-US").replace(/,/g, " ")
-            );
-        }
+	    return report.replace(/\b\d+(\.\d+)?\b/g, (match) => 
+		Math.round(Number(match)).toLocaleString("en-US").replace(/,/g, " ")
+	    );
+	}
 
         const formattedReport_1 = formatNumbers(Report_1);
         const formattedReport_2 = formatNumbers(Report_2);
