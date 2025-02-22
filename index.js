@@ -93,12 +93,11 @@ async function fetchAndSendReport() {
 📅 ${formattedDate}
 
 🔹<b>eclipsebet com:</b> 
-	${Report_1}
+${Report_1}
 🔹<b>moyobet ke:</b> 
-	${Report_2}
+${Report_2}
 🔹<b>moyobet com:</b> 
-	${Report_3}
-
+${Report_3}
 <a href="${REPORT_LINK}">🔗Смотреть полный отчет</a>`;
 
         bot.telegram.sendMessage(CHAT_ID, message, { parse_mode: "HTML" });
