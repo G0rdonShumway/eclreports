@@ -121,14 +121,13 @@ cron.schedule('1 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
 
 const message = `
 📅 ${formattedDate}
+
 🔹<b>eclipsebet com:</b> 
-${Report_1}
-
+	${Report_1}
 🔹<b>moyobet ke:</b> 
-${Report_2}
-
+	${Report_2}
 🔹<b>moyobet com:</b> 
-${Report_3}
+	${Report_3}
 
 <a href="${REPORT_LINK}">🔗Смотреть полный отчет</a>`;
 
