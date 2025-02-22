@@ -89,15 +89,25 @@ async function fetchAndSendReport() {
 
         const formattedDate = reportDate.toFormat("dd-MM-yy HH:00");
 
+	function formatNumbers(report) {
+            return report.replace(/\b\d{1,3}(?=(\d{3})+(?!\d))/g, (match) =>
+                Number(match).toLocaleString("en-US").replace(/,/g, " ")
+            );
+        }
+
+        const formattedReport_1 = formatNumbers(Report_1);
+        const formattedReport_2 = formatNumbers(Report_2);
+        const formattedReport_3 = formatNumbers(Report_3);
+
         const message = `
 📅 ${formattedDate}
 
 🔹<b>eclipsebet com:</b> 
-${Report_1}
+${formattedReport_1}
 🔹<b>moyobet ke:</b> 
-${Report_2}
+${formattedReport_2}
 🔹<b>moyobet com:</b> 
-${Report_3}
+${formattedReport_3}
 <a href="${REPORT_LINK}">🔗Смотреть полный отчет</a>`;
 
         bot.telegram.sendMessage(CHAT_ID, message, { parse_mode: "HTML" });
