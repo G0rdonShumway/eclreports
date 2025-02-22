@@ -4,7 +4,7 @@ const axios = require('axios');
 const cron = require('node-cron');
 const express = require('express');
 const mysql = require('mysql2/promise');
-const { DateTime } = require('luxon'); // Добавляем библиотеку Luxon
+const { DateTime } = require('luxon');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const CHAT_ID = process.env.CHAT_ID;
@@ -27,16 +27,13 @@ const dbConfig = {
 const bot = new Telegraf(BOT_TOKEN);
 const app = express();
 
-// Webhook для Telegram
 app.use(bot.webhookCallback('/bot'));
 bot.telegram.setWebhook(`${SELF_URL}/bot`);
 
-// Маршрут для проверки работы бота
 app.get('/', (req, res) => {
     res.send('Бот работает!');
 });
 
-// Функция для запроса к MySQL
 async function queryDatabase(sql, params = []) {
     let connection;
     try {
@@ -51,28 +48,11 @@ async function queryDatabase(sql, params = []) {
     }
 }
 
-// Тестовая команда
-bot.command('test', (ctx) => {
-    ctx.reply('Бот может отправлять сообщения!');
-});
-
-bot.command("link", (ctx) => {
-    ctx.reply(`<a href="${REPORT_LINK}">🔗 Полный отчет</a>`, { parse_mode: "HTML" });
-});
-
-// Получение Chat ID
-bot.command('id', (ctx) => {
-    console.log(`Chat ID: ${ctx.chat.id}`);
-    ctx.reply(`Ваш Chat ID: ${ctx.chat.id}`);
-});
-
 async function fetchReport(url) {
 	try {
 		const response = await fetch(url, {
 			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			}
+			headers: {'Content-Type': 'application/json',}
 		});
 
 		if (!response.ok) {
@@ -86,40 +66,30 @@ async function fetchReport(url) {
 	}
 }
 
-// Запрос к API и БД каждую первую минуту нечетного часа
-cron.schedule('1 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
+async function fetchAndSendReport() {
     try {
-        await fetchReport(FETCH_URL_1);
-        await fetchReport(FETCH_URL_2);
-        await fetchReport(FETCH_URL_3);
+        let now = DateTime.now().setZone("Asia/Tbilisi");
+        let reportDate = now;
 
-        setTimeout(async () => {
-            // Используем Luxon для работы с часовым поясом
-            let now = DateTime.now().setZone("Asia/Tbilisi");
-            let reportDate = now;
+        if (now.hour === 1) {
+            reportDate = now.minus({ days: 1 });
+        }
 
-            if (now.hour === 1) {
-                // Если запрос в 01:00, берём вчерашнюю дату
-                reportDate = now.minus({ days: 1 });
-            }
+        const reports_1 = await queryDatabase('SELECT Report FROM `interval_reports` ORDER BY ID DESC LIMIT 1');
+        const reports_2 = await queryDatabase('SELECT Report FROM `moyo_ke_interval_reports` ORDER BY ID DESC LIMIT 1');
+        const reports_3 = await queryDatabase('SELECT Report FROM `moyo_com_interval_reports` ORDER BY ID DESC LIMIT 1');
 
-            // 3. Запрос к БД
-            const reports_1 = await queryDatabase('SELECT Report, DateTime FROM `interval_reports` ORDER BY ID DESC LIMIT 1');
-            const reports_2 = await queryDatabase('SELECT Report, DateTime FROM `moyo_ke_interval_reports` ORDER BY ID DESC LIMIT 1');
-            const reports_3 = await queryDatabase('SELECT Report, DateTime FROM `moyo_com_interval_reports` ORDER BY ID DESC LIMIT 1');
+        if (!reports_1 || reports_1.length === 0) {
+            return bot.telegram.sendMessage(CHAT_ID, 'Нет отчета.');
+        }
 
-            if (!reports_1 || reports_1.length === 0) {
-                return bot.telegram.sendMessage(CHAT_ID, 'Нет отчета.');
-            }
+        const { Report: Report_1 } = reports_1[0];
+        const { Report: Report_2 } = reports_2[0] || { Report: "Нет данных" };
+        const { Report: Report_3 } = reports_3[0] || { Report: "Нет данных" };
 
-            // 4. Форматирование даты
-		const { Report: Report_1 } = reports_1[0];
-		const { Report: Report_2 } = reports_2[0] || { Report: "Нет данных" };
-		const { Report: Report_3 } = reports_3[0] || { Report: "Нет данных" };
+        const formattedDate = reportDate.toFormat("dd-MM-yy HH:00");
 
-            const formattedDate = reportDate.toFormat("dd-MM-yy HH:00");
-
-const message = `
+        const message = `
 📅 ${formattedDate}
 
 🔹<b>eclipsebet com:</b> 
@@ -131,42 +101,32 @@ const message = `
 
 <a href="${REPORT_LINK}">🔗Смотреть полный отчет</a>`;
 
-bot.telegram.sendMessage(CHAT_ID, message, { parse_mode: "HTML" });
-		
-        }, 5000);
+        bot.telegram.sendMessage(CHAT_ID, message, { parse_mode: "HTML" });
     } catch (error) {
         console.error(`Ошибка при получении отчёта:`, error.message);
     }
-}, {
-    scheduled: true,
-    timezone: "Asia/Tbilisi"
+}
+
+bot.command('test', (ctx) => ctx.reply('Бот может отправлять сообщения!'));
+bot.command('id', (ctx) => ctx.reply(`Ваш Chat ID: ${ctx.chat.id}`));
+bot.command('report', async (ctx) => {
+    await fetchAndSendReport();
 });
 
+cron.schedule('1 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
+    await fetchReport(FETCH_URL_1);
+    await fetchReport(FETCH_URL_2);
+    await fetchReport(FETCH_URL_3);
+    setTimeout(fetchAndSendReport, 5000);
+}, { scheduled: true, timezone: "Asia/Tbilisi" });
 
 cron.schedule('*/5 * * * *', async () => {
     try {
-        await fetch(SELF_URL);
-        // await bot.telegram.sendMessage(CHAT_ID, 'Пинг 🟢');
+        await axios.get(SELF_URL);
         console.log(`Пинг отправлен`);
     } catch (error) {
         console.error('Ошибка пинга:', error);
     }
-}, {
-   scheduled: true,
-   timezone: "Asia/Tbilisi"
-});
+}, { scheduled: true, timezone: "Asia/Tbilisi" });
 
-// Пингует бота каждые 10 минут, чтобы Render не засыпал
-// setInterval(async () => {
-//     try {
-//         await bot.telegram.sendMessage(CHAT_ID, 'Пинг 🟢');
-//         console.log(`Пинг отправлен`);
-//     } catch (error) {
-//         console.error('Ошибка пинга:', error);
-//     }
-// }, 600000);
-
-// Запуск Express сервера
-app.listen(PORT, () => {
-    console.log(`Сервер запущен на порту ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Сервер запущен на порту ${PORT}`));
