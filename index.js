@@ -14,6 +14,8 @@ const FETCH_URL_2 = process.env.FETCH_URL_2;
 const FETCH_URL_3 = process.env.FETCH_URL_3;
 const REPORT_LINK = process.env.REPORT_LINK;
 
+const ADD_PLAYER = process.env.ADD_PLAYER;
+
 const SELF_URL = process.env.SELF_URL;
 const PORT = process.env.PORT || 3000;
 
@@ -120,6 +122,28 @@ bot.command('test', (ctx) => ctx.reply('Бот может отправлять �
 bot.command('id', (ctx) => ctx.reply(`Ваш Chat ID: ${ctx.chat.id}`));
 bot.command('report', async (ctx) => {
     await fetchAndSendReport();
+});
+
+bot.command('addplayer', (ctx) => {
+    ctx.reply('Введите логин спортсмена:');
+    bot.on('text', async (ctx) => {
+        const login = ctx.message.text.trim();
+
+        if (!login) {
+            return ctx.reply('Логин не может быть пустым. Попробуйте снова.');
+        }
+
+        try {
+            const url = `${ADD_PLAYER}?user=${encodeURIComponent(login)}`;
+            const response = await fetch(url);
+            const data = await response.text();
+
+            ctx.reply(`Результат запроса: ${data}`);
+        } catch (error) {
+            console.error('Ошибка:', error);
+            ctx.reply('Произошла ошибка. Попробуйте позже.');
+        }
+    });
 });
 
 cron.schedule('1 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
