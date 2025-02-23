@@ -1,5 +1,6 @@
 require('dotenv').config();
 const { Telegraf } = require('telegraf');
+const { Markup } = require("telegraf");
 const axios = require('axios');
 const cron = require('node-cron');
 const express = require('express');
@@ -34,6 +35,16 @@ bot.telegram.setWebhook(`${SELF_URL}/bot`);
 
 app.get('/', (req, res) => {
     res.send('Бот работает!');
+});
+
+bot.start((ctx) => {
+    ctx.reply(
+        "Выберите команду:",
+        Markup.keyboard([
+            ["Re-do report", "Add Sport Player"],
+            ["Chat ID"]
+        ]).resize()
+    );
 });
 
 async function queryDatabase(sql, params = []) {
@@ -119,31 +130,56 @@ ${formattedReport_3}
 }
 
 bot.command('test', (ctx) => ctx.reply('Бот может отправлять сообщения!'));
-bot.command('id', (ctx) => ctx.reply(`Ваш Chat ID: ${ctx.chat.id}`));
-bot.command('report', async (ctx) => {
-    await fetchAndSendReport();
+
+bot.hears("Add Sport Player", (ctx) => {
+    ctx.reply("Введите логин спортсмена:");
+    bot.on("text", async (ctx) => {
+        const username = ctx.message.text.trim();
+        await fetch(`https://eclservice.org/reports/api/add_sport_player.php?user=${username}`);
+        ctx.reply(`✅ Спортсмен ${username} добавлен!`);
+    });
 });
 
-bot.command('addplayer', (ctx) => {
-    ctx.reply('Введите логин спортсмена:');
-    bot.on('text', async (ctx) => {
-        const login = ctx.message.text.trim();
+bot.hears("Chat ID", (ctx) => {
+    ctx.reply(`Ваш Chat ID: ${ctx.chat.id}`);
+});
 
-        if (!login) {
-            return ctx.reply('Логин не может быть пустым. Попробуйте снова.');
-        }
+bot.hears("Re-do report", (ctx) => {
+    ctx.reply(
+        "Выберите платформу:",
+        Markup.inlineKeyboard([
+            [Markup.button.callback("eclipsebet.com", "redo_eclipse")],
+            [Markup.button.callback("moyobet.ke", "redo_moyo_ke")],
+            [Markup.button.callback("moyobet.com", "redo_moyo_com")],
+            [Markup.button.callback("re-send report", "resend_report")]
+        ])
+    );
+});
 
-        try {
-            const url = `${ADD_PLAYER}?user=${encodeURIComponent(login)}`;
-            const response = await fetch(url);
-            const data = await response.text();
+bot.action("redo_eclipse", async (ctx) => {
+    await ctx.answerCbQuery();
+    await fetch("https://eclservice.org/check/get_report.php");
+    ctx.reply("✅ Отчет для eclipsebet.com обновлен!");
+});
 
-            ctx.reply(`Результат запроса: ${data}`);
-        } catch (error) {
-            console.error('Ошибка:', error);
-            ctx.reply('Произошла ошибка. Попробуйте позже.');
-        }
-    });
+bot.action("redo_moyo_ke", async (ctx) => {
+    await ctx.answerCbQuery();
+    await fetch("https://eclservice.org/check/get_report_moyo_ke.php");
+    ctx.reply("✅ Отчет для moyobet.ke обновлен!");
+});
+
+bot.action("redo_moyo_com", async (ctx) => {
+    await ctx.answerCbQuery();
+    await fetch("https://eclservice.org/check/get_report_moyo_com.php");
+    ctx.reply("✅ Отчет для moyobet.com обновлен!");
+});
+
+bot.action('resend_report', async (ctx) => {
+    const chatId = ctx.chat.id;
+    const lastMessageId = ctx.callbackQuery.message.message_id;
+    await ctx.telegram.deleteMessage(chatId, lastMessageId);
+    await fetchAndSendReport();
+    ctx.reply("✅ Отчет отправлен!");
 });
 
 cron.schedule('1 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
