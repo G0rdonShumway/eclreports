@@ -48,7 +48,6 @@ bot.use((ctx, next) => {
 
 bot.start((ctx) => {
     ctx.reply(
-        "Выберите команду:",
         Markup.keyboard([
             ["Re-do report", "Manage sport players"],
             ["Chat ID"]
