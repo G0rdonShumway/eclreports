@@ -37,6 +37,15 @@ app.get('/', (req, res) => {
     res.send('Бот работает!');
 });
 
+const allowedChats = [1023702517, -4685830501]; // ID пользователей и групп
+
+bot.use((ctx, next) => {
+    if (!allowedChats.includes(ctx.chat.id)) {
+        return ctx.reply("⛔ Access Denied! Contact @G0rdonShumway for permission.");
+    }
+    return next();
+});
+
 bot.start((ctx) => {
     ctx.reply(
         "Выберите команду:",
