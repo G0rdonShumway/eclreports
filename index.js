@@ -155,7 +155,7 @@ bot.action("add_sport_player", async (ctx) => {
     ctx.reply("Введите логин спортсмена:");
     bot.on("text", async (ctx) => {
         const username = ctx.message.text.trim();
-        await fetch(`https://eclservice.org/reports/api/add_sport_player.php?add&user=${username}`);
+        await fetch(`https://eclservice.org/reports/api/manage_sport_player.php?add&user=${username}`);
         ctx.reply(`✅ Спортсмен ${username} добавлен!`);
     });
 });
@@ -164,7 +164,7 @@ bot.action("delete_sport_player", async (ctx) => {
     ctx.reply("Введите логин спортсмена:");
     bot.on("text", async (ctx) => {
         const username = ctx.message.text.trim();
-        await fetch(`https://eclservice.org/reports/api/add_sport_player.php?delete&user=${username}`);
+        await fetch(`https://eclservice.org/reports/api/manage_sport_player.php?delete&user=${username}`);
         ctx.reply(`✅ Спортсмен ${username} удален!`);
     });
 });
