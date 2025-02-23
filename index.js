@@ -152,7 +152,7 @@ bot.hears("Manage sport players", (ctx) => {
 });
 
 bot.action("add_sport_player", async (ctx) => {
-    ctx.reply("Введите логин спортсмена:");
+    ctx.reply("Добавить спортсмена:");
     bot.on("text", async (ctx) => {
         const username = ctx.message.text.trim();
         await fetch(`https://eclservice.org/reports/api/manage_sport_player.php?add&user=${username}`);
@@ -161,7 +161,7 @@ bot.action("add_sport_player", async (ctx) => {
 });
 
 bot.action("delete_sport_player", async (ctx) => {
-    ctx.reply("Введите логин спортсмена:");
+    ctx.reply("Удалить спортсмена:");
     bot.on("text", async (ctx) => {
         const username = ctx.message.text.trim();
         await fetch(`https://eclservice.org/reports/api/manage_sport_player.php?delete&user=${username}`);
@@ -171,8 +171,22 @@ bot.action("delete_sport_player", async (ctx) => {
 
 bot.action("lookup_sport_player", async (ctx) => {
     await ctx.answerCbQuery();
-    await fetch("https://eclservice.org/reports/api/manage_sport_player.php?lookup");
+
+    try {
+        const response = await fetch("https://eclservice.org/reports/api/manage_sport_player.php?lookup");
+        const data = await response.json();
+
+        if (data.players && data.players.length > 0) {
+            await ctx.reply(`📋 Список спортсменов:\n` + data.players.map(user => `- ${user}`).join("\n"));
+        } else {
+            await ctx.reply("⚠️ В списке пока нет спортсменов.");
+        }
+    } catch (error) {
+        console.error("Ошибка при запросе списка игроков:", error);
+        await ctx.reply("❌ Ошибка при получении данных. Попробуйте позже.");
+    }
 });
+
 
 bot.hears("Chat ID", (ctx) => {
     ctx.reply(`Ваш Chat ID: ${ctx.chat.id}`);
