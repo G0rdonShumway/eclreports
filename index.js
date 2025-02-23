@@ -50,7 +50,7 @@ bot.start((ctx) => {
     ctx.reply(
         "Выберите команду:",
         Markup.keyboard([
-            ["Re-do report", "Add Sport Player"],
+            ["Re-do report", "Manage sport players"],
             ["Chat ID"]
         ]).resize()
     );
@@ -140,13 +140,38 @@ ${formattedReport_3}
 
 bot.command('test', (ctx) => ctx.reply('Бот может отправлять сообщения!'));
 
-bot.hears("Add Sport Player", (ctx) => {
+bot.hears("Manage sport players", (ctx) => {
+    ctx.reply(
+        "Выберите действие:",
+        Markup.inlineKeyboard([
+            [Markup.button.callback("Добавить игрока", "add_sport_player")],
+            [Markup.button.callback("Удалить игрока", "delete_sport_player")],
+            [Markup.button.callback("Просмотреть добавленных", "lookup_sport_player")]
+        ])
+    );
+});
+
+bot.action("add_sport_player", async (ctx) => {
     ctx.reply("Введите логин спортсмена:");
     bot.on("text", async (ctx) => {
         const username = ctx.message.text.trim();
-        await fetch(`https://eclservice.org/reports/api/add_sport_player.php?user=${username}`);
+        await fetch(`https://eclservice.org/reports/api/add_sport_player.php?add&user=${username}`);
         ctx.reply(`✅ Спортсмен ${username} добавлен!`);
     });
+});
+
+bot.action("delete_sport_player", async (ctx) => {
+    ctx.reply("Введите логин спортсмена:");
+    bot.on("text", async (ctx) => {
+        const username = ctx.message.text.trim();
+        await fetch(`https://eclservice.org/reports/api/add_sport_player.php?delete&user=${username}`);
+        ctx.reply(`✅ Спортсмен ${username} удален!`);
+    });
+});
+
+bot.action("lookup_sport_player", async (ctx) => {
+    await ctx.answerCbQuery();
+    await fetch("https://eclservice.org/reports/api/manage_sport_player.php?lookup");
 });
 
 bot.hears("Chat ID", (ctx) => {
@@ -184,9 +209,6 @@ bot.action("redo_moyo_com", async (ctx) => {
 });
 
 bot.action('resend_report', async (ctx) => {
-    const chatId = ctx.chat.id;
-    const lastMessageId = ctx.callbackQuery.message.message_id;
-    await ctx.telegram.deleteMessage(chatId, lastMessageId);
     await fetchAndSendReport();
     ctx.reply("✅ Отчет отправлен!");
 });
