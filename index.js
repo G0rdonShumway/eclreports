@@ -227,21 +227,38 @@ bot.action('resend_report', async (ctx) => {
 });
 
 cron.schedule('0 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
-    await fetchReport(FETCH_URL_1);
+    setTimeout(async () => {
+        const urls = [FETCH_URL_1, FETCH_URL_2, FETCH_URL_3];
+        const failedRequests = [];
+        for (const url of urls) {
+            let attempts = 0;
+            let success = false;
+            while (attempts < 3 && !success) {
+                try {
+                    const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+                    if (!response.ok) {
+                        throw new Error(`Ошибка запроса: ${response.statusText}`);
+                    }
+                    success = true;
+                } catch (error) {
+                    console.error(`Попытка ${attempts + 1} не удалась для ${url}:`, error.message);
+                    attempts++;
+                    if (attempts === 3) {
+                        failedRequests.push(url);
+                    }
+                }
+            }
+        }
+        if (failedRequests.length > 0) {
+            const errorMessage = `❌ Не удалось выполнить запросы:\n${failedRequests.join('\n')}`;
+            bot.telegram.sendMessage(1023702517, errorMessage);
+        } else {
+            setTimeout(fetchAndSendReport, 5000);
+        }
+
+    }, 30000); // Задержка 30 секунд
 }, { scheduled: true, timezone: "Asia/Tbilisi" });
 
-cron.schedule('30 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
-    await fetchReport(FETCH_URL_2);
-}, { scheduled: true, timezone: "Asia/Tbilisi" });
-
-cron.schedule('1 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
-    try {
-        await fetchReport(FETCH_URL_3); // Дождаться завершения запроса
-        setTimeout(fetchAndSendReport, 5000);
-    } catch (error) {
-        console.error("Ошибка при выполнении fetchReport(FETCH_URL_3):", error);
-    }
-}, { scheduled: true, timezone: "Asia/Tbilisi" });
 
 cron.schedule('*/5 * * * *', async () => {
     try {
