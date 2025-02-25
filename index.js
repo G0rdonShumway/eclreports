@@ -226,11 +226,21 @@ bot.action('resend_report', async (ctx) => {
     ctx.reply("✅ Отчет отправлен!");
 });
 
-cron.schedule('1 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
+cron.schedule('0 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
     await fetchReport(FETCH_URL_1);
+}, { scheduled: true, timezone: "Asia/Tbilisi" });
+
+cron.schedule('30 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
     await fetchReport(FETCH_URL_2);
-    await fetchReport(FETCH_URL_3);
-    setTimeout(fetchAndSendReport, 5000);
+}, { scheduled: true, timezone: "Asia/Tbilisi" });
+
+cron.schedule('1 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
+    try {
+        await fetchReport(FETCH_URL_3); // Дождаться завершения запроса
+        setTimeout(fetchAndSendReport, 5000);
+    } catch (error) {
+        console.error("Ошибка при выполнении fetchReport(FETCH_URL_3):", error);
+    }
 }, { scheduled: true, timezone: "Asia/Tbilisi" });
 
 cron.schedule('*/5 * * * *', async () => {
