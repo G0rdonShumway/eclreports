@@ -246,7 +246,7 @@ async function setSettingsBeforeFetch(projectId) {
             throw new Error(`Ошибка setSettings: ${response.statusText}`);
         }
 
-        console.log(`setSettings успешно выполнен для projectId: ${projectId}`);
+        console.log(`✅ Успешный запрос, проект:  ${projectId}`);
     } catch (error) {
         console.error(`Ошибка при setSettings для projectId ${projectId}:`, error.message);
     }
