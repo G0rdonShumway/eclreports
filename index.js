@@ -198,6 +198,7 @@ bot.hears("Re-do report", (ctx) => {
             [Markup.button.callback("eclipsebet.com", "redo_eclipse")],
             [Markup.button.callback("moyobet.ke", "redo_moyo_ke")],
             [Markup.button.callback("moyobet.com", "redo_moyo_com")],
+            [Markup.button.callback("All reports", "redo_all_reports")],
             [Markup.button.callback("re-send report", "resend_report")]
         ])
     );
@@ -221,44 +222,57 @@ bot.action("redo_moyo_com", async (ctx) => {
     ctx.reply("✅ Отчет для moyobet.com обновлен!");
 });
 
+bot.action("redo_all_reports", async (ctx) => {
+    await ctx.answerCbQuery();
+    await fetchAllReports();
+    ctx.reply("✅ Все отчеты обновлены!");
+});
+
 bot.action('resend_report', async (ctx) => {
     await fetchAndSendReport();
     ctx.reply("✅ Отчет отправлен!");
 });
 
-cron.schedule('0 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
-    setTimeout(async () => {
-        const urls = [FETCH_URL_1, FETCH_URL_2, FETCH_URL_3];
-        const failedRequests = [];
-        for (const url of urls) {
-            let attempts = 0;
-            let success = false;
-            while (attempts < 3 && !success) {
-                try {
-                    const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
-                    if (!response.ok) {
-                        throw new Error(`Ошибка запроса: ${response.statusText}`);
-                    }
-                    success = true;
-                } catch (error) {
-                    console.error(`Попытка ${attempts + 1} не удалась для ${url}:`, error.message);
-                    attempts++;
-                    if (attempts === 3) {
-                        failedRequests.push(url);
-                    }
+async function fetchAllReports() {
+    const urls = [FETCH_URL_1, FETCH_URL_2, FETCH_URL_3];
+    const failedRequests = [];
+
+    for (const url of urls) {
+        let attempts = 0;
+        let success = false;
+
+        while (attempts < 3 && !success) {
+            try {
+                const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+
+                if (!response.ok) {
+                    throw new Error(`Ошибка запроса: ${response.statusText}`);
+                }
+
+                success = true; // Если запрос успешен, выходим из цикла
+            } catch (error) {
+                console.error(`Попытка ${attempts + 1} не удалась для ${url}:`, error.message);
+                attempts++;
+                if (attempts === 3) {
+                    failedRequests.push(url);
                 }
             }
         }
-        if (failedRequests.length > 0) {
-            const errorMessage = `❌ Не удалось выполнить запросы:\n${failedRequests.join('\n')}`;
-            bot.telegram.sendMessage(1023702517, errorMessage);
-        } else {
-            setTimeout(fetchAndSendReport, 5000);
-        }
+    }
 
-    }, 30000); // Задержка 30 секунд
+    // Если есть неудачные запросы — отправляем сообщение
+    if (failedRequests.length > 0) {
+        const errorMessage = `❌ Не удалось выполнить запросы:\n${failedRequests.join('\n')}`;
+        bot.telegram.sendMessage(1023702517, errorMessage);
+    } else {
+        // Все запросы успешны → отправляем отчет
+        setTimeout(fetchAndSendReport, 5000);
+    }
+}
+
+cron.schedule('0 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
+    setTimeout(fetchAllReports, 30000);
 }, { scheduled: true, timezone: "Asia/Tbilisi" });
-
 
 cron.schedule('*/5 * * * *', async () => {
     try {
