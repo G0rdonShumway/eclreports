@@ -18,6 +18,7 @@ const REPORT_LINK = process.env.REPORT_LINK;
 const ADD_PLAYER = process.env.ADD_PLAYER;
 
 const SELF_URL = process.env.SELF_URL;
+const BASE_URL = process.env.BASE_URL;
 const PORT = process.env.PORT || 3000;
 
 const dbConfig = {
@@ -154,7 +155,7 @@ bot.action("add_sport_player", async (ctx) => {
     ctx.reply("Добавить спортсмена:");
     bot.on("text", async (ctx) => {
         const username = ctx.message.text.trim();
-        await fetch(`https://eclservice.org/reports/api/manage_sport_player.php?add&user=${username}`);
+        await fetch(`${BASE_URL}reports/api/manage_sport_player.php?add&user=${username}`);
         ctx.reply(`✅ Спортсмен ${username} добавлен!`);
     });
 });
@@ -163,7 +164,7 @@ bot.action("delete_sport_player", async (ctx) => {
     ctx.reply("Удалить спортсмена:");
     bot.on("text", async (ctx) => {
         const username = ctx.message.text.trim();
-        await fetch(`https://eclservice.org/reports/api/manage_sport_player.php?delete&user=${username}`);
+        await fetch(`${BASE_URL}reports/api/manage_sport_player.php?delete&user=${username}`);
         ctx.reply(`✅ Спортсмен ${username} удален!`);
     });
 });
@@ -172,7 +173,7 @@ bot.action("lookup_sport_player", async (ctx) => {
     await ctx.answerCbQuery();
 
     try {
-        const response = await fetch("https://eclservice.org/reports/api/manage_sport_player.php?lookup");
+        const response = await fetch(`${BASE_URL}reports/api/manage_sport_player.php?lookup`);
         const data = await response.json();
 
         if (data.players && data.players.length > 0) {
