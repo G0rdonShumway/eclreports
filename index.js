@@ -234,39 +234,66 @@ bot.action('resend_report', async (ctx) => {
     ctx.reply("✅ Отчет отправлен!");
 });
 
+async function setSettingsBeforeFetch(projectId) {
+    try {
+        const response = await fetch(`${BASE_URL}endpoints/setSettings.php`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ project: projectId })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Ошибка setSettings: ${response.statusText}`);
+        }
+
+        console.log(`setSettings успешно выполнен для projectId: ${projectId}`);
+    } catch (error) {
+        console.error(`Ошибка при setSettings для projectId ${projectId}:`, error.message);
+    }
+}
+
 async function fetchAllReports() {
-    const urls = [FETCH_URL_1, FETCH_URL_2, FETCH_URL_3];
+    const urls = [
+        { url: FETCH_URL_1, projectId: 1868048 },
+        { url: FETCH_URL_2, projectId: 18757058 },
+        { url: FETCH_URL_3, projectId: 18754737 }
+    ];
     const failedRequests = [];
 
-    for (const url of urls) {
+    for (const { url, projectId } of urls) {
         let attempts = 0;
         let success = false;
 
-        while (attempts < 3 && !success) {
-            try {
-                const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+        try {
+            await setSettingsBeforeFetch(projectId); // Запрос перед основным
 
-                if (!response.ok) {
-                    throw new Error(`Ошибка запроса: ${response.statusText}`);
-                }
-		console.log(`Request ${url} success.`);
-                success = true; // Если запрос успешен, выходим из цикла
-            } catch (error) {
-                console.error(`Попытка ${attempts + 1} не удалась для ${url}:`, error.message);
-                attempts++;
-                if (attempts === 3) {
-                    failedRequests.push(url);
+            while (attempts < 3 && !success) {
+                try {
+                    const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+
+                    if (!response.ok) {
+                        throw new Error(`Ошибка запроса: ${response.statusText}`);
+                    }
+
+                    console.log(`✅ Успешный запрос: ${url}`);
+                    success = true;
+                } catch (error) {
+                    console.error(`❌ Попытка ${attempts + 1} не удалась для ${url}:`, error.message);
+                    attempts++;
+                    if (attempts === 3) {
+                        failedRequests.push(url);
+                    }
                 }
             }
+        } catch (error) {
+            console.error(`Ошибка при подготовке перед запросом ${url}:`, error.message);
         }
     }
 
-    // Если есть неудачные запросы — отправляем сообщение
     if (failedRequests.length > 0) {
         const errorMessage = `❌ Не удалось выполнить запросы:\n${failedRequests.join('\n')}`;
         bot.telegram.sendMessage(1023702517, errorMessage);
     } else {
-        // Все запросы успешны → отправляем отчет
         setTimeout(fetchAndSendReport, 5000);
     }
 }
