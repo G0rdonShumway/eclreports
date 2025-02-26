@@ -249,7 +249,7 @@ async function fetchAllReports() {
                 if (!response.ok) {
                     throw new Error(`Ошибка запроса: ${response.statusText}`);
                 }
-
+		console.log(`Request ${url} success.);
                 success = true; // Если запрос успешен, выходим из цикла
             } catch (error) {
                 console.error(`Попытка ${attempts + 1} не удалась для ${url}:`, error.message);
