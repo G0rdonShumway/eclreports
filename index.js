@@ -206,19 +206,19 @@ bot.hears("Re-do report", (ctx) => {
 
 bot.action("redo_eclipse", async (ctx) => {
     await ctx.answerCbQuery();
-    await fetch("https://eclservice.org/check/get_report.php");
+    await fetch(FETCH_URL_1);
     ctx.reply("✅ Отчет для eclipsebet.com обновлен!");
 });
 
 bot.action("redo_moyo_ke", async (ctx) => {
     await ctx.answerCbQuery();
-    await fetch("https://eclservice.org/check/get_report_moyo_ke.php");
+    await fetch(FETCH_URL_2);
     ctx.reply("✅ Отчет для moyobet.ke обновлен!");
 });
 
 bot.action("redo_moyo_com", async (ctx) => {
     await ctx.answerCbQuery();
-    await fetch("https://eclservice.org/check/get_report_moyo_com.php");
+    await fetch(FETCH_URL_3);
     ctx.reply("✅ Отчет для moyobet.com обновлен!");
 });
 
