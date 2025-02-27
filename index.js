@@ -354,9 +354,9 @@ cron.schedule('0 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
     setTimeout(fetchAllReports, 10000);
 }, { scheduled: true, timezone: "Asia/Tbilisi" });
 
-cron.schedule('0 1,6,11,16,21,26,31,36,41,46,51,56 * * * *', async () => {
-    setTimeout(fetchDailyReports, 10000);
-}, { scheduled: true, timezone: "Asia/Tbilisi" });
+// cron.schedule('0 1,6,11,16,21,26,31,36,41,46,51,56 * * * *', async () => {
+//     setTimeout(fetchDailyReports, 10000);
+// }, { scheduled: true, timezone: "Asia/Tbilisi" });
 
 cron.schedule('*/5 * * * *', async () => {
     try {
