@@ -292,7 +292,7 @@ async function fetchDailyReports() {
     for (const { url, projectId } of reports) {
         try {
             await setSettingsBeforeFetch(projectId);
-            await new Promise(resolve => setTimeout(resolve, 5000));
+            await new Promise(resolve => setTimeout(resolve, 10000));
 
             const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
 
@@ -305,7 +305,7 @@ async function fetchDailyReports() {
             console.error(`❌ Ошибка запроса для ${url}:`, error.message);
         }
 
-        await new Promise(resolve => setTimeout(resolve, 5000)); // Пауза 5 секунд между запросами
+        await new Promise(resolve => setTimeout(resolve, 10000)); // Пауза 5 секунд между запросами
     }
 }
 
@@ -349,15 +349,15 @@ async function fetchAllReports() {
         const errorMessage = `❌ Не удалось выполнить запросы:\n${failedRequests.join('\n')}`;
         bot.telegram.sendMessage(1023702517, errorMessage);
     } else {
-        setTimeout(fetchAndSendReport, 5000);
+        setTimeout(fetchAndSendReport, 10000);
     }
 }
 
 cron.schedule('0 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
-    setTimeout(fetchAllReports, 5000);
+    setTimeout(fetchAllReports, 10000);
 }, { scheduled: true, timezone: "Asia/Tbilisi" });
 
-cron.schedule('1-59/5 * * * *', async () => {
+cron.schedule('0 1,6,11,16,21,26,31,36,41,46,51,56 * * * *', async () => {
     await fetchDailyReports();
 }, { scheduled: true, timezone: "Asia/Tbilisi" });
 
