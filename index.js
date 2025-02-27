@@ -11,9 +11,17 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 const CHAT_ID = process.env.CHAT_ID;
 
 const FETCH_URL_1 = process.env.FETCH_URL_1;
-const FETCH_DAILY = process.env.FETCH_DAILY;
 const FETCH_URL_2 = process.env.FETCH_URL_2;
 const FETCH_URL_3 = process.env.FETCH_URL_3;
+const FETCH_DAILY_ECOM = process.env.FETCH_DAILY_ECOM;
+const FETCH_DAILY_MKE = process.env.FETCH_DAILY_MKE;
+const FETCH_DAILY_MCOM = process.env.FETCH_DAILY_MCOM;
+
+const QUERY_ECOM = process.env.QUERY_ECOM;
+const QUERY_MKE = process.env.QUERY_MKE;
+const QUERY_MCOM = process.env.QUERY_MCOM;
+
+
 const REPORT_LINK = process.env.REPORT_LINK;
 const DAILY_REPORT_LINK = process.env.DAILY_REPORT_LINK;
 
@@ -99,9 +107,9 @@ async function fetchAndSendReport() {
             reportDate = now.minus({ days: 1 });
         }
 
-        const reports_1 = await queryDatabase('SELECT Report FROM `interval_reports` ORDER BY ID DESC LIMIT 1');
-        const reports_2 = await queryDatabase('SELECT Report FROM `moyo_ke_interval_reports` ORDER BY ID DESC LIMIT 1');
-        const reports_3 = await queryDatabase('SELECT Report FROM `moyo_com_interval_reports` ORDER BY ID DESC LIMIT 1');
+        const reports_1 = await queryDatabase(QUERY_ECOM);
+        const reports_2 = await queryDatabase(QUERY_MKE);
+        const reports_3 = await queryDatabase(QUERY_MCOM);
 
         if (!reports_1 || reports_1.length === 0) {
             return bot.telegram.sendMessage(CHAT_ID, 'Нет отчета.');
@@ -126,11 +134,11 @@ async function fetchAndSendReport() {
         const message = `
 📅 ${formattedDate}
 
-🔹<b>eclipsebet com:</b> 
+🔹<b>e com:</b> 
 ${formattedReport_1}
-🔹<b>moyobet ke:</b> 
+🔹<b>m ke:</b> 
 ${formattedReport_2}
-🔹<b>moyobet com:</b> 
+🔹<b>m com:</b> 
 ${formattedReport_3}
 <a href="${REPORT_LINK}">🔗Смотреть полный отчет</a>
 <a href="${DAILY_REPORT_LINK}">🔗Дневной отчет</a>`;
@@ -199,38 +207,50 @@ bot.hears("Re-do report", (ctx) => {
     ctx.reply(
         "Выберите платформу:",
         Markup.inlineKeyboard([
-            [Markup.button.callback("eclipsebet.com", "redo_eclipse")],
-            [Markup.button.callback("moyobet.ke", "redo_moyo_ke")],
-            [Markup.button.callback("moyobet.com", "redo_moyo_com")],
-            [Markup.button.callback("get daily", "get_daily")],
+            [Markup.button.callback("ecom", "redo_ecom")],
+            [Markup.button.callback("mke", "redo_mke")],
+            [Markup.button.callback("mcom", "redo_mcom")],
+            [Markup.button.callback("daily ecom", "get_daily_ecom")],
+            [Markup.button.callback("daily mke", "get_daily_mke")],
+            [Markup.button.callback("daily mcom", "get_daily_mcom")],
             [Markup.button.callback("All reports", "redo_all_reports")],
             [Markup.button.callback("re-send report", "resend_report")]
         ])
     );
 });
 
-bot.action("redo_eclipse", async (ctx) => {
+bot.action("redo_ecom", async (ctx) => {
     await ctx.answerCbQuery();
     await fetch(FETCH_URL_1);
-    ctx.reply("✅ Отчет для eclipsebet.com обновлен!");
+    ctx.reply("✅ Отчет для ECOM обновлен!");
 });
 
-bot.action("get_daily", async (ctx) => {
+bot.action("get_daily_ecom", async (ctx) => {
     await ctx.answerCbQuery();
-    await fetch(FETCH_DAILY);
-    ctx.reply("✅ Дневной отчет обновлен!");
+    await fetch(FETCH_DAILY_ECOM);
+    ctx.reply("✅ Дневной отчет ECOM обновлен!");
+});
+bot.action("get_daily_mke", async (ctx) => {
+    await ctx.answerCbQuery();
+    await fetch(FETCH_DAILY_MKE);
+    ctx.reply("✅ Дневной отчет MKE обновлен!");
+});
+bot.action("get_daily_mcom", async (ctx) => {
+    await ctx.answerCbQuery();
+    await fetch(FETCH_DAILY_MCOM);
+    ctx.reply("✅ Дневной отчет MCOM обновлен!");
 });
 
-bot.action("redo_moyo_ke", async (ctx) => {
+bot.action("redo_mke", async (ctx) => {
     await ctx.answerCbQuery();
     await fetch(FETCH_URL_2);
-    ctx.reply("✅ Отчет для moyobet.ke обновлен!");
+    ctx.reply("✅ Отчет для MKE обновлен!");
 });
 
-bot.action("redo_moyo_com", async (ctx) => {
+bot.action("redo_mcom", async (ctx) => {
     await ctx.answerCbQuery();
     await fetch(FETCH_URL_3);
-    ctx.reply("✅ Отчет для moyobet.com обновлен!");
+    ctx.reply("✅ Отчет для MCOM обновлен!");
 });
 
 bot.action("redo_all_reports", async (ctx) => {
@@ -265,9 +285,11 @@ async function setSettingsBeforeFetch(projectId) {
 async function fetchAllReports() {
     const urls = [
         { url: FETCH_URL_1, projectId: 1868048 },
-        { url: FETCH_DAILY, projectId: 1868048 },
         { url: FETCH_URL_2, projectId: 18757058 },
-        { url: FETCH_URL_3, projectId: 18754737 }
+        { url: FETCH_URL_3, projectId: 18754737 },
+        { url: FETCH_DAILY_MKE, projectId: 18757058 },
+        { url: FETCH_DAILY_ECOM, projectId: 1868048 },
+        { url: FETCH_DAILY_MCOM, projectId: 18754737 }
     ];
     const failedRequests = [];
 
