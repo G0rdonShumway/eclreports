@@ -282,14 +282,38 @@ async function setSettingsBeforeFetch(projectId) {
     }
 }
 
+async function fetchDailyReports() {
+    const reports = [
+        { url: FETCH_DAILY_ECOM, projectId: 1868048 },
+        { url: FETCH_DAILY_MKE, projectId: 18757058 },
+        { url: FETCH_DAILY_MCOM, projectId: 18754737 }
+    ];
+
+    for (const { url, projectId } of reports) {
+        try {
+            await setSettingsBeforeFetch(projectId);
+            await new Promise(resolve => setTimeout(resolve, 5000));
+
+            const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+
+            if (!response.ok) {
+                throw new Error(`Ошибка запроса: ${response.statusText}`);
+            }
+
+            console.log(`✅ Успешный запрос: ${url}`);
+        } catch (error) {
+            console.error(`❌ Ошибка запроса для ${url}:`, error.message);
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 5000)); // Пауза 5 секунд между запросами
+    }
+}
+
 async function fetchAllReports() {
     const urls = [
         { url: FETCH_URL_1, projectId: 1868048 },
         { url: FETCH_URL_2, projectId: 18757058 },
-        { url: FETCH_URL_3, projectId: 18754737 },
-        { url: FETCH_DAILY_MKE, projectId: 18757058 },
-        { url: FETCH_DAILY_ECOM, projectId: 1868048 },
-        { url: FETCH_DAILY_MCOM, projectId: 18754737 }
+        { url: FETCH_URL_3, projectId: 18754737 }
     ];
     const failedRequests = [];
 
@@ -298,16 +322,14 @@ async function fetchAllReports() {
         let success = false;
 
         try {
-            await setSettingsBeforeFetch(projectId); // Запрос перед основным
+            await setSettingsBeforeFetch(projectId);
 
             while (attempts < 3 && !success) {
                 try {
                     const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
-
                     if (!response.ok) {
                         throw new Error(`Ошибка запроса: ${response.statusText}`);
                     }
-
                     console.log(`✅ Успешный запрос: ${url}`);
                     success = true;
                 } catch (error) {
@@ -332,7 +354,11 @@ async function fetchAllReports() {
 }
 
 cron.schedule('0 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
-    setTimeout(fetchAllReports, 30000);
+    setTimeout(fetchAllReports, 5000);
+}, { scheduled: true, timezone: "Asia/Tbilisi" });
+
+cron.schedule('1-59/5 * * * *', async () => {
+    await fetchDailyReports();
 }, { scheduled: true, timezone: "Asia/Tbilisi" });
 
 cron.schedule('*/5 * * * *', async () => {
