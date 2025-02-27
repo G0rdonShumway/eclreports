@@ -15,6 +15,7 @@ const FETCH_DAILY = process.env.FETCH_DAILY;
 const FETCH_URL_2 = process.env.FETCH_URL_2;
 const FETCH_URL_3 = process.env.FETCH_URL_3;
 const REPORT_LINK = process.env.REPORT_LINK;
+const DAILY_REPORT_LINK = process.env.DAILY_REPORT_LINK;
 
 const ADD_PLAYER = process.env.ADD_PLAYER;
 
@@ -131,7 +132,8 @@ ${formattedReport_1}
 ${formattedReport_2}
 🔹<b>moyobet com:</b> 
 ${formattedReport_3}
-<a href="${REPORT_LINK}">🔗Смотреть полный отчет</a>`;
+<a href="${REPORT_LINK}">🔗Смотреть полный отчет</a>
+<a href="${DAILY_REPORT_LINK}">🔗Дневной отчет</a>`;
 
         bot.telegram.sendMessage(CHAT_ID, message, { parse_mode: "HTML" });
     } catch (error) {
