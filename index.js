@@ -292,7 +292,6 @@ async function fetchDailyReports() {
     for (const { url, projectId } of reports) {
         try {
             await setSettingsBeforeFetch(projectId);
-            await new Promise(resolve => setTimeout(resolve, 10000));
 
             const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
 
@@ -304,8 +303,6 @@ async function fetchDailyReports() {
         } catch (error) {
             console.error(`❌ Ошибка запроса для ${url}:`, error.message);
         }
-
-        await new Promise(resolve => setTimeout(resolve, 10000)); // Пауза 5 секунд между запросами
     }
 }
 
@@ -358,7 +355,7 @@ cron.schedule('0 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
 }, { scheduled: true, timezone: "Asia/Tbilisi" });
 
 cron.schedule('0 1,6,11,16,21,26,31,36,41,46,51,56 * * * *', async () => {
-    await fetchDailyReports();
+    setTimeout(fetchDailyReports, 10000);
 }, { scheduled: true, timezone: "Asia/Tbilisi" });
 
 cron.schedule('*/5 * * * *', async () => {
