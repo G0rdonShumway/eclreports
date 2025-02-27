@@ -11,6 +11,7 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 const CHAT_ID = process.env.CHAT_ID;
 
 const FETCH_URL_1 = process.env.FETCH_URL_1;
+const FETCH_DAILY = process.env.FETCH_DAILY;
 const FETCH_URL_2 = process.env.FETCH_URL_2;
 const FETCH_URL_3 = process.env.FETCH_URL_3;
 const REPORT_LINK = process.env.REPORT_LINK;
@@ -199,6 +200,7 @@ bot.hears("Re-do report", (ctx) => {
             [Markup.button.callback("eclipsebet.com", "redo_eclipse")],
             [Markup.button.callback("moyobet.ke", "redo_moyo_ke")],
             [Markup.button.callback("moyobet.com", "redo_moyo_com")],
+            [Markup.button.callback("get daily", "get_daily")],
             [Markup.button.callback("All reports", "redo_all_reports")],
             [Markup.button.callback("re-send report", "resend_report")]
         ])
@@ -209,6 +211,12 @@ bot.action("redo_eclipse", async (ctx) => {
     await ctx.answerCbQuery();
     await fetch(FETCH_URL_1);
     ctx.reply("✅ Отчет для eclipsebet.com обновлен!");
+});
+
+bot.action("get_daily", async (ctx) => {
+    await ctx.answerCbQuery();
+    await fetch(FETCH_DAILY);
+    ctx.reply("✅ Дневной отчет обновлен!");
 });
 
 bot.action("redo_moyo_ke", async (ctx) => {
@@ -255,6 +263,7 @@ async function setSettingsBeforeFetch(projectId) {
 async function fetchAllReports() {
     const urls = [
         { url: FETCH_URL_1, projectId: 1868048 },
+        { url: FETCH_DAILY, projectId: 1868048 },
         { url: FETCH_URL_2, projectId: 18757058 },
         { url: FETCH_URL_3, projectId: 18754737 }
     ];
