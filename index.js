@@ -76,12 +76,15 @@ app.post('/register', async (req, res) => {
 });
 
 // Функция для отправки результата в callbackUrl
-async function sendResult(callbackUrl, status) {
+async function sendResult(callbackUrl, status, email) {
     try {
-        await axios.post(callbackUrl, { status });
+        await axios.post(callbackUrl, { 
+            email: email, 
+            approved: status === "success" 
+        });
         console.log(`✅ Ответ отправлен в ${callbackUrl}`);
     } catch (error) {
-        console.error("❌ Ошибка при отправке ответа:", error.message);
+        console.error("❌ Ошибка при отправки ответа:", error.message);
     }
 }
 
@@ -93,13 +96,13 @@ bot.command(/approve_(\d+)/, async (ctx) => {
         return ctx.reply("⛔ Запрос не найден или уже обработан.");
     }
 
-    const { callbackUrl } = pendingRequests[requestId];
+    const { callbackUrl, email } = pendingRequests[requestId];
     delete pendingRequests[requestId];
 
     ctx.reply("✅ Регистрация подтверждена!");
 
     if (callbackUrl) {
-        await sendResult(callbackUrl, "success");
+        await sendResult(callbackUrl, "success", email);
     }
 });
 
