@@ -289,22 +289,32 @@ async function fetchDailyReports() {
         { url: FETCH_DAILY_MCOM, projectId: 18754737 }
     ];
 
+    // Получаем вчерашнюю дату в формате YYYY-MM-DD
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const formattedDate = yesterday.toISOString().split('T')[0]; 
+
     for (const { url, projectId } of reports) {
         try {
             await setSettingsBeforeFetch(projectId);
 
-            const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ date: formattedDate }) 
+            });
 
             if (!response.ok) {
                 throw new Error(`Ошибка запроса: ${response.statusText}`);
             }
 
-            console.log(`✅ Успешный запрос: ${url}`);
+            console.log(`✅ Успешный запрос: ${url} (Дата: ${formattedDate})`);
         } catch (error) {
             console.error(`❌ Ошибка запроса для ${url}:`, error.message);
         }
     }
 }
+
 
 async function fetchAllReports() {
     const urls = [
