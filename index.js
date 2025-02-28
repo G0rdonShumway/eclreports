@@ -69,7 +69,7 @@ app.post('/register', async (req, res) => {
 
         await bot.telegram.sendMessage(TELEGRAM_USER_ID, message);
 
-        res.status(202).json({ status: "pending", message: "Ожидание подтверждения." });
+        res.status(200).json({ status: "pending", message: "Ожидание подтверждения." });
     } catch (error) {
         res.status(500).json({ error: "Ошибка сервера" });
     }
