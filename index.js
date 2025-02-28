@@ -50,6 +50,73 @@ app.get('/', (req, res) => {
 
 const allowedChats = [1023702517, -4685830501]; // ID пользователей и групп
 
+app.use(express.json());
+
+let pendingRequests = {}; // Храним данные для подтверждения
+
+app.post('/register', async (req, res) => {
+    try {
+        const requestId = Date.now();
+        pendingRequests[requestId] = { data: req.body, res };
+
+        const message = `🔔 Новая регистрация!\n\n`
+            + `👤 Имя: ${req.body.name}\n`
+            + `📧 Email: ${req.body.email}\n`
+            + `📱 Телефон: ${req.body.phone}\n\n`
+            + `✅ Подтвердить: /approve_${requestId}\n`
+            + `❌ Отклонить: /reject_${requestId}`;
+
+        await bot.telegram.sendMessage(1023702517, message);
+
+        res.status(202).json({ status: "pending", message: "Ожидание подтверждения." });
+    } catch (error) {
+        res.status(500).json({ error: "Ошибка сервера" });
+    }
+});
+
+bot.command(/approve_(\d+)/, async (ctx) => {
+    const requestId = ctx.match[1];
+
+    if (!pendingRequests[requestId]) {
+        return ctx.reply("⛔ Запрос не найден или уже обработан.");
+    }
+
+    const { res, data } = pendingRequests[requestId];
+    delete pendingRequests[requestId];
+
+    ctx.reply("✅ Регистрация подтверждена!");
+
+    try {
+        await axios.post(data.callbackUrl, { status: "success" });
+    } catch (error) {
+        console.error("Ошибка при отправке ответа:", error.message);
+    }
+
+    res.status(200).json({ status: "success" });
+});
+
+bot.command(/reject_(\d+)/, async (ctx) => {
+    const requestId = ctx.match[1];
+
+    if (!pendingRequests[requestId]) {
+        return ctx.reply("⛔ Запрос не найден или уже обработан.");
+    }
+
+    delete pendingRequests[requestId];
+    ctx.reply("❌ Регистрация отклонена.");
+});
+
+
+
+
+
+
+
+
+
+
+
+
 bot.use((ctx, next) => {
     if (!allowedChats.includes(ctx.chat.id)) {
         return ctx.reply("⛔ Access Denied! Contact @G0rdonShumway for permission.");
