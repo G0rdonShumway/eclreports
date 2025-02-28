@@ -52,12 +52,13 @@ const allowedChats = [1023702517, -4685830501]; // ID пользователей
 
 app.use(express.json());
 
-let pendingRequests = {}; // Храним данные для подтверждения
+let pendingRequests = {}; // Храним только данные запроса, без res
 
+// Обработчик POST-запроса на регистрацию
 app.post('/register', async (req, res) => {
     try {
         const requestId = Date.now();
-        pendingRequests[requestId] = { data: req.body, res };
+        pendingRequests[requestId] = req.body; // Сохраняем только данные
 
         const message = `🔔 Новая регистрация!\n\n`
             + `👤 Имя: ${req.body.name}\n`
@@ -66,7 +67,7 @@ app.post('/register', async (req, res) => {
             + `✅ Подтвердить: /approve_${requestId}\n`
             + `❌ Отклонить: /reject_${requestId}`;
 
-        await bot.telegram.sendMessage(1023702517, message);
+        await bot.telegram.sendMessage(TELEGRAM_USER_ID, message);
 
         res.status(202).json({ status: "pending", message: "Ожидание подтверждения." });
     } catch (error) {
@@ -74,6 +75,17 @@ app.post('/register', async (req, res) => {
     }
 });
 
+// Функция для отправки результата в callbackUrl
+async function sendResult(callbackUrl, status) {
+    try {
+        await axios.post(callbackUrl, { status });
+        console.log(`✅ Ответ отправлен в ${callbackUrl}`);
+    } catch (error) {
+        console.error("❌ Ошибка при отправке ответа:", error.message);
+    }
+}
+
+// Команда подтверждения
 bot.command(/approve_(\d+)/, async (ctx) => {
     const requestId = ctx.match[1];
 
@@ -81,20 +93,17 @@ bot.command(/approve_(\d+)/, async (ctx) => {
         return ctx.reply("⛔ Запрос не найден или уже обработан.");
     }
 
-    const { res, data } = pendingRequests[requestId];
+    const { callbackUrl } = pendingRequests[requestId];
     delete pendingRequests[requestId];
 
     ctx.reply("✅ Регистрация подтверждена!");
 
-    try {
-        await axios.post(data.callbackUrl, { status: "success" });
-    } catch (error) {
-        console.error("Ошибка при отправке ответа:", error.message);
+    if (callbackUrl) {
+        await sendResult(callbackUrl, "success");
     }
-
-    res.status(200).json({ status: "success" });
 });
 
+// Команда отклонения
 bot.command(/reject_(\d+)/, async (ctx) => {
     const requestId = ctx.match[1];
 
