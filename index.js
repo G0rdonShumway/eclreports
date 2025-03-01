@@ -44,7 +44,7 @@ const app = express();
 
 app.use(express.json());
 
-const SITE_URL = 'https://11bee785-9248-4a86-8d59-f17d0530b3a1-00-19vz2fjgedheq.pike.replit.dev/'; // Укажите URL сайта
+const SITE_URL = 'https://11bee785-9248-4a86-8d59-f17d0530b3a1-00-19vz2fjgedheq.pike.replit.dev'; // Укажите URL сайта
 
 app.use(bot.webhookCallback('/bot'));
 bot.telegram.setWebhook(`${SELF_URL}/bot`);
