@@ -18,28 +18,45 @@ async function handleNewRequest(userId, username, email, adminId) {
 
 async function approveRequest(userId, siteUrl) {
     try {
-        await fetch(`${siteUrl}/approve.php`, {
+        const response = await fetch(`${siteUrl}/approve.php`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ user_id: userId, status: 'approved' })
         });
-        pendingRequests.delete(userId);
+
+        const data = await response.json();
+
+        if (response.ok) {
+            console.log(`✅ Заявка ${userId} подтверждена.`);
+            pendingRequests.delete(userId);
+        } else {
+            console.error(`❌ Ошибка при подтверждении заявки:`, data.error);
+        }
     } catch (error) {
-        console.error('Ошибка при подтверждении заявки:', error);
+        console.error('❌ Ошибка сети при подтверждении:', error);
     }
 }
 
 async function rejectRequest(userId, siteUrl) {
     try {
-        await fetch(`${siteUrl}/approve.php`, {
+        const response = await fetch(`${siteUrl}/approve.php`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ user_id: userId, status: 'rejected' })
         });
-        pendingRequests.delete(userId);
+
+        const data = await response.json();
+
+        if (response.ok) {
+            console.log(`❌ Заявка ${userId} отклонена.`);
+            pendingRequests.delete(userId);
+        } else {
+            console.error(`⚠ Ошибка при отклонении заявки:`, data.error);
+        }
     } catch (error) {
-        console.error('Ошибка при отклонении заявки:', error);
+        console.error('❌ Ошибка сети при отклонении:', error);
     }
 }
+
 
 module.exports = { handleNewRequest, approveRequest, rejectRequest };
