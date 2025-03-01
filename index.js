@@ -50,14 +50,22 @@ app.use(bot.webhookCallback('/bot'));
 bot.telegram.setWebhook(`${SELF_URL}/bot`);
 
 app.post('/webhook', async (req, res) => {
+    console.log('Получен запрос:', req.body); // Логируем запрос для отладки
+
     const { user_id, username, email } = req.body;
+
     if (!user_id || !username || !email) {
         return res.status(400).json({ error: 'Некорректные данные' });
     }
-    await bot.telegram.sendMessage(ADMIN_ID, `Новая заявка: ${username} (${email})`);
-    res.json({ success: true });
-});
 
+    try {
+        await bot.telegram.sendMessage(1023702517, `🔹 Новая заявка\n👤 Имя: ${username}\n📧 Email: ${email}\n✅ Подтвердить: /approve_${user_id}\n❌ Отклонить: /reject_${user_id}`);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Ошибка при отправке в Telegram:', error);
+        res.status(500).json({ error: 'Ошибка при отправке сообщения' });
+    }
+});
 
 bot.command(/approve_(\w+)/, async (ctx) => {
     const userId = ctx.match[1];
