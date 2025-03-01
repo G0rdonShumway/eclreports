@@ -49,6 +49,14 @@ const SITE_URL = 'https://11bee785-9248-4a86-8d59-f17d0530b3a1-00-19vz2fjgedheq.
 app.use(bot.webhookCallback('/bot'));
 bot.telegram.setWebhook(`${SELF_URL}/bot`);
 
+app.post('/webhook', async (req, res) => {
+    const { user_id, username, email } = JSON.parse(decodeURIComponent(req.query.data));
+    const success = await handleNewRequest(user_id, username, email, 1023702517);
+
+    res.send(success ? 'Заявка отправлена.' : 'Ошибка отправки.');
+});
+
+
 bot.command(/approve_(\w+)/, async (ctx) => {
     const userId = ctx.match[1];
     await ctx.reply(`✅ Заявка ${userId} одобрена.`);
