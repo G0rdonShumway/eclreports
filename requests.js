@@ -21,19 +21,19 @@ async function approveRequest(userId, siteUrl) {
         const response = await fetch(`${siteUrl}/approve.php`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: userId, status: 'approved' })
+            body: JSON.stringify({ user_id: userId, status: 'approved' }),
         });
 
-        const data = await response.json();
+        const result = await response.json();
+        console.log('Ответ сервера:', result);
 
-        if (response.ok) {
-            console.log(`✅ Заявка ${userId} подтверждена.`);
-            pendingRequests.delete(userId);
-        } else {
-            console.error(`❌ Ошибка при подтверждении заявки:`, data.error);
+        if (!response.ok) {
+            throw new Error(result.error || 'Ошибка при подтверждении заявки');
         }
+
+        pendingRequests.delete(userId);
     } catch (error) {
-        console.error('❌ Ошибка сети при подтверждении:', error);
+        console.error('❌ Ошибка при подтверждении заявки:', error);
     }
 }
 
@@ -42,21 +42,22 @@ async function rejectRequest(userId, siteUrl) {
         const response = await fetch(`${siteUrl}/approve.php`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: userId, status: 'rejected' })
+            body: JSON.stringify({ user_id: userId, status: 'rejected' }),
         });
 
-        const data = await response.json();
+        const result = await response.json();
+        console.log('Ответ сервера:', result);
 
-        if (response.ok) {
-            console.log(`❌ Заявка ${userId} отклонена.`);
-            pendingRequests.delete(userId);
-        } else {
-            console.error(`⚠ Ошибка при отклонении заявки:`, data.error);
+        if (!response.ok) {
+            throw new Error(result.error || 'Ошибка при отклонении заявки');
         }
+
+        pendingRequests.delete(userId);
     } catch (error) {
-        console.error('❌ Ошибка сети при отклонении:', error);
+        console.error('❌ Ошибка при отклонении заявки:', error);
     }
 }
+
 
 
 module.exports = { handleNewRequest, approveRequest, rejectRequest };
