@@ -6,6 +6,7 @@ const cron = require('node-cron');
 const express = require('express');
 const mysql = require('mysql2/promise');
 const { DateTime } = require('luxon');
+const { handleNewRequest, approveRequest, rejectRequest } = require('./requests');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const CHAT_ID = process.env.CHAT_ID;
@@ -41,8 +42,26 @@ const dbConfig = {
 const bot = new Telegraf(BOT_TOKEN);
 const app = express();
 
+app.use(express.json());
+
+const SITE_URL = 'https://your-site.com'; // Укажите URL сайта
+
 app.use(bot.webhookCallback('/bot'));
 bot.telegram.setWebhook(`${SELF_URL}/bot`);
+
+bot.command(/approve_(\w+)/, async (ctx) => {
+    const userId = ctx.match[1];
+    await ctx.reply(`✅ Заявка ${userId} одобрена.`);
+    await approveRequest(userId, SITE_URL);
+});
+
+bot.command(/reject_(\w+)/, async (ctx) => {
+    const userId = ctx.match[1];
+    await ctx.reply(`❌ Заявка ${userId} отклонена.`);
+    await rejectRequest(userId, SITE_URL);
+});
+
+
 
 app.get('/', (req, res) => {
     res.send('Бот работает!');
@@ -378,3 +397,5 @@ cron.schedule('*/5 * * * *', async () => {
 }, { scheduled: true, timezone: "Asia/Tbilisi" });
 
 app.listen(PORT, () => console.log(`Сервер запущен на порту ${PORT}`));
+
+module.exports = { bot };
