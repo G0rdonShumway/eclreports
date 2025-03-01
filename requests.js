@@ -20,8 +20,11 @@ async function approveRequest(userId, siteUrl) {
     try {
         const response = await fetch(`${siteUrl}/approve.php`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: userId, status: 'approved' }),
+            headers: { 
+                'Content-Type': 'application/json',
+                'User-Agent': 'TelegramBot/1.0' // Добавляем заголовок
+            },
+            body: JSON.stringify({ user_id: userId, status: 'approved' })
         });
 
         const result = await response.json();
@@ -41,8 +44,11 @@ async function rejectRequest(userId, siteUrl) {
     try {
         const response = await fetch(`${siteUrl}/approve.php`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: userId, status: 'rejected' }),
+            headers: { 
+                'Content-Type': 'application/json',
+                'User-Agent': 'TelegramBot/1.0'
+            },
+            body: JSON.stringify({ user_id: userId, status: 'rejected' })
         });
 
         const result = await response.json();
@@ -57,6 +63,7 @@ async function rejectRequest(userId, siteUrl) {
         console.error('❌ Ошибка при отклонении заявки:', error);
     }
 }
+
 
 
 
