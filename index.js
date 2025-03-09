@@ -133,7 +133,7 @@ async function fetchAndSendReport() {
     const luxonDateMke = DateTime.fromSQL(timeMke); // Преобразуем строку в объект luxon
     const luxonDateMcom = DateTime.fromSQL(timeMcom); // Преобразуем строку в объект luxon
 
-    if (luxonDate.isValid) {
+    if (luxonDateEcom.isValid && luxonDateMke.isValid && luxonDateMcom.isValid) {
       const formattedDateEcom = luxonDateEcom.toFormat("dd-MM-yy HH:mm");
       const formattedDateMke = luxonDateMke.toFormat("dd-MM-yy HH:mm");
       const formattedDateMcom = luxonDateMcom.toFormat("dd-MM-yy HH:mm");
