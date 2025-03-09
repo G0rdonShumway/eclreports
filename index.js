@@ -79,22 +79,23 @@ async function queryDatabase(sql, params = []) {
     }
 }
 
-async function fetchReport(url) {
-	try {
-		const response = await fetch(url, {
-			method: 'POST',
-			headers: {'Content-Type': 'application/json',}
-		});
+async function fetchReport(url, timestamp) {
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ timestamp })
+        });
 
-		if (!response.ok) {
-			throw new Error('Network response was not ok');
-		}
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
 
-		const data = await response.json();
-		console.log(data);
-	} catch (error) {
-		console.error(`Ошибка запроса:`, error);
-	}
+        const data = await response.json();
+        console.log(`[${timestamp}]`, data);
+    } catch (error) {
+        console.error(`[${timestamp}] Ошибка запроса:`, error);
+    }
 }
 
 async function fetchAndSendReport() {
@@ -219,24 +220,14 @@ bot.hears("Re-do report", (ctx) => {
 
 bot.action("redo_ecom", async (ctx) => {
     await ctx.answerCbQuery();
-    await fetch(FETCH_URL_1);
-    ctx.reply("✅ Отчет для ECOM обновлен!");
-});
 
-bot.action("get_daily_ecom", async (ctx) => {
-    await ctx.answerCbQuery();
-    await fetch(FETCH_DAILY_ECOM);
-    ctx.reply("✅ Дневной отчет ECOM обновлен!");
-});
-bot.action("get_daily_mke", async (ctx) => {
-    await ctx.answerCbQuery();
-    await fetch(FETCH_DAILY_MKE);
-    ctx.reply("✅ Дневной отчет MKE обновлен!");
-});
-bot.action("get_daily_mcom", async (ctx) => {
-    await ctx.answerCbQuery();
-    await fetch(FETCH_DAILY_MCOM);
-    ctx.reply("✅ Дневной отчет MCOM обновлен!");
+    // Получаем текущее время в GMT+4
+    const now = new Date();
+    now.setUTCHours(now.getUTCHours() + 4);
+    const timestamp = now.toISOString().replace('T', ' ').split('.')[0]; // Формат "YYYY-MM-DD HH:mm:ss"
+
+    await fetchReport(FETCH_URL_1, timestamp);
+    ctx.reply(`✅ Отчет для ECOM обновлен! (${timestamp} GMT+4)`);
 });
 
 bot.action("redo_mke", async (ctx) => {
@@ -260,6 +251,22 @@ bot.action("redo_all_reports", async (ctx) => {
 bot.action('resend_report', async (ctx) => {
     await fetchAndSendReport();
     ctx.reply("✅ Отчет отправлен!");
+});
+
+bot.action("get_daily_ecom", async (ctx) => {
+    await ctx.answerCbQuery();
+    await fetch(FETCH_DAILY_ECOM);
+    ctx.reply("✅ Дневной отчет ECOM обновлен!");
+});
+bot.action("get_daily_mke", async (ctx) => {
+    await ctx.answerCbQuery();
+    await fetch(FETCH_DAILY_MKE);
+    ctx.reply("✅ Дневной отчет MKE обновлен!");
+});
+bot.action("get_daily_mcom", async (ctx) => {
+    await ctx.answerCbQuery();
+    await fetch(FETCH_DAILY_MCOM);
+    ctx.reply("✅ Дневной отчет MCOM обновлен!");
 });
 
 async function setSettingsBeforeFetch(projectId) {
