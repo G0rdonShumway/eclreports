@@ -6,7 +6,6 @@ const cron = require('node-cron');
 const express = require('express');
 const mysql = require('mysql2/promise');
 const { DateTime } = require('luxon');
-const { handleNewRequest, approveRequest, rejectRequest } = require('./requests');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const CHAT_ID = process.env.CHAT_ID;
@@ -43,43 +42,6 @@ const bot = new Telegraf(BOT_TOKEN);
 const app = express();
 
 app.use(express.json());
-
-const SITE_URL = 'https://11bee785-9248-4a86-8d59-f17d0530b3a1-00-19vz2fjgedheq.pike.replit.dev'; // Укажите URL сайта
-
-app.use(bot.webhookCallback('/bot'));
-bot.telegram.setWebhook(`${SELF_URL}/bot`);
-
-app.post('/webhook', async (req, res) => {
-    console.log('Получен запрос:', req.body); // Логируем запрос для отладки
-
-    const { user_id, username, email } = req.body;
-
-    if (!user_id || !username || !email) {
-        return res.status(400).json({ error: 'Некорректные данные' });
-    }
-
-    try {
-        await bot.telegram.sendMessage(1023702517, `🔹 Новая заявка\n👤 Имя: ${username}\n📧 Email: ${email}\n✅ Подтвердить: /approve_${user_id}\n❌ Отклонить: /reject_${user_id}`);
-        res.json({ success: true });
-    } catch (error) {
-        console.error('Ошибка при отправке в Telegram:', error);
-        res.status(500).json({ error: 'Ошибка при отправке сообщения' });
-    }
-});
-
-bot.command(/approve_(\w+)/, async (ctx) => {
-    const userId = ctx.match[1];
-    await ctx.reply(`✅ Заявка ${userId} одобрена.`);
-    await approveRequest(userId, SITE_URL);
-});
-
-bot.command(/reject_(\w+)/, async (ctx) => {
-    const userId = ctx.match[1];
-    await ctx.reply(`❌ Заявка ${userId} отклонена.`);
-    await rejectRequest(userId, SITE_URL);
-});
-
-
 
 app.get('/', (req, res) => {
     res.send('Бот работает!');
@@ -246,9 +208,9 @@ bot.hears("Re-do report", (ctx) => {
             [Markup.button.callback("ecom", "redo_ecom")],
             [Markup.button.callback("mke", "redo_mke")],
             [Markup.button.callback("mcom", "redo_mcom")],
-            [Markup.button.callback("daily ecom", "get_daily_ecom")],
-            [Markup.button.callback("daily mke", "get_daily_mke")],
-            [Markup.button.callback("daily mcom", "get_daily_mcom")],
+            // [Markup.button.callback("daily ecom", "get_daily_ecom")],
+            // [Markup.button.callback("daily mke", "get_daily_mke")],
+            // [Markup.button.callback("daily mcom", "get_daily_mcom")],
             [Markup.button.callback("All reports", "redo_all_reports")],
             [Markup.button.callback("re-send report", "resend_report")]
         ])
@@ -386,6 +348,10 @@ async function fetchAllReports() {
         } catch (error) {
             console.error(`Ошибка при подготовке перед запросом ${url}:`, error.message);
         }
+
+        // Задержка 30 секунд перед следующим запросом
+        console.log(`⏳ Ожидание 30 секунд перед следующим запросом...`);
+        await new Promise(resolve => setTimeout(resolve, 30000));
     }
 
     if (failedRequests.length > 0) {
@@ -395,6 +361,7 @@ async function fetchAllReports() {
         setTimeout(fetchAndSendReport, 10000);
     }
 }
+
 
 cron.schedule('0 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
     setTimeout(fetchAllReports, 10000);
