@@ -333,6 +333,10 @@ cron.schedule('*/5 * * * *', async () => {
     }
 }, { scheduled: true, timezone: "Asia/Tbilisi" });
 
+bot.launch()
+    .then(() => console.log('Бот запущен и готов к работе!'))
+    .catch((error) => console.error('Ошибка запуска бота:', error));
+
 app.listen(PORT, () => console.log(`Сервер запущен на порту ${PORT}`));
 
 module.exports = { bot };
