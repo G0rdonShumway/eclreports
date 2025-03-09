@@ -133,17 +133,13 @@ async function fetchAndSendReport() {
     const luxonDateMke = DateTime.fromSQL(timeMke); // Преобразуем строку в объект luxon
     const luxonDateMcom = DateTime.fromSQL(timeMcom); // Преобразуем строку в объект luxon
 
-      console.log(timeEcom)
-      console.log(timeMke)
-      console.log(timeMcom)
+      // console.log(timeEcom)
+      // console.log(timeMke)
+      // console.log(timeMcom)
     
-    if (luxonDateEcom.isValid && luxonDateMke.isValid && luxonDateMcom.isValid) {
-      const formattedDateEcom = luxonDateEcom.toFormat("dd-MM-yy HH:mm");
-      const formattedDateMke = luxonDateMke.toFormat("dd-MM-yy HH:mm");
-      const formattedDateMcom = luxonDateMcom.toFormat("dd-MM-yy HH:mm");
-    } else {
-      console.error("Неверный формат даты");
-    }
+      const formattedDateEcom = timeEcom.toISOString().replace("T", " ").split(".")[0];
+      const formattedDateMke = timeMke.toISOString().replace("T", " ").split(".")[0];
+      const formattedDateMcom = timeMcom.toISOString().replace("T", " ").split(".")[0];
 
     function formatNumbers(report) {
       return report.replace(/\b\d+(\.\d+)?\b/g, (match) =>
