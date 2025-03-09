@@ -125,9 +125,9 @@ async function fetchAndSendReport() {
     const { Report: Report_2 } = reports_2[0] || { Report: "Нет данных" };
     const { Report: Report_3 } = reports_3[0] || { Report: "Нет данных" };
 
-    const { DateTime: timeEcom } = reports_1[1];
-    const { DateTime: timeMke } = reports_2[1];
-    const { DateTime: timeMcom } = reports_3[1];
+    const { DateTime: timeEcom } = reports_1[0];
+    const { DateTime: timeMke } = reports_2[0];
+    const { DateTime: timeMcom } = reports_3[0];
 
     const luxonDateEcom = DateTime.fromSQL(timeEcom); // Преобразуем строку в объект luxon
     const luxonDateMke = DateTime.fromSQL(timeMke); // Преобразуем строку в объект luxon
