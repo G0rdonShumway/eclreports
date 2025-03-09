@@ -367,10 +367,10 @@ cron.schedule('0 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
     setTimeout(fetchAllReports, 10000);
 }, { scheduled: true, timezone: "Asia/Tbilisi" });
 
-cron.schedule('2 1 * * *', async () => {
-    setTimeout(fetchDailyReports, 10000);
-	bot.telegram.sendMessage(1023702517, `<a href="${DAILY_REPORT_LINK}">🔗Дневной отчет</a> готов.`);
-}, { scheduled: true, timezone: "Asia/Tbilisi" });
+// cron.schedule('2 1 * * *', async () => {
+//     setTimeout(fetchDailyReports, 10000);
+// 	bot.telegram.sendMessage(1023702517, `<a href="${DAILY_REPORT_LINK}">🔗Дневной отчет</a> готов.`);
+// }, { scheduled: true, timezone: "Asia/Tbilisi" });
 
 cron.schedule('*/5 * * * *', async () => {
     try {
