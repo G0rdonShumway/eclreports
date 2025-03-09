@@ -57,13 +57,16 @@ bot.use((ctx, next) => {
 });
 
 bot.start((ctx) => {
-    ctx.reply(
-        Markup.keyboard([
-            ["Re-do report", "Manage sport players"],
-            ["Chat ID"]
-        ]).resize()
-    );
+    console.log('Команда /start получена');
+    ctx.reply('Привет, бот работает!')
+        .then(() => {
+            console.log('Сообщение отправлено');
+        })
+        .catch((err) => {
+            console.error('Ошибка при отправке сообщения:', err);
+        });
 });
+
 
 async function queryDatabase(sql, params = []) {
     let connection;
@@ -209,9 +212,6 @@ bot.hears("Re-do report", (ctx) => {
             [Markup.button.callback("ecom", "redo_ecom")],
             [Markup.button.callback("mke", "redo_mke")],
             [Markup.button.callback("mcom", "redo_mcom")],
-            // [Markup.button.callback("daily ecom", "get_daily_ecom")],
-            // [Markup.button.callback("daily mke", "get_daily_mke")],
-            // [Markup.button.callback("daily mcom", "get_daily_mcom")],
             [Markup.button.callback("All reports", "redo_all_reports")],
             [Markup.button.callback("re-send report", "resend_report")]
         ])
@@ -253,22 +253,6 @@ bot.action('resend_report', async (ctx) => {
     ctx.reply("✅ Отчет отправлен!");
 });
 
-bot.action("get_daily_ecom", async (ctx) => {
-    await ctx.answerCbQuery();
-    await fetch(FETCH_DAILY_ECOM);
-    ctx.reply("✅ Дневной отчет ECOM обновлен!");
-});
-bot.action("get_daily_mke", async (ctx) => {
-    await ctx.answerCbQuery();
-    await fetch(FETCH_DAILY_MKE);
-    ctx.reply("✅ Дневной отчет MKE обновлен!");
-});
-bot.action("get_daily_mcom", async (ctx) => {
-    await ctx.answerCbQuery();
-    await fetch(FETCH_DAILY_MCOM);
-    ctx.reply("✅ Дневной отчет MCOM обновлен!");
-});
-
 async function setSettingsBeforeFetch(projectId) {
     try {
         const response = await fetch(`${BASE_URL}endpoints/setSettings.php`, {
@@ -286,40 +270,6 @@ async function setSettingsBeforeFetch(projectId) {
         console.error(`Ошибка при setSettings для projectId ${projectId}:`, error.message);
     }
 }
-
-async function fetchDailyReports() {
-    const reports = [
-        { url: FETCH_DAILY_ECOM, projectId: 1868048 },
-        { url: FETCH_DAILY_MKE, projectId: 18757058 },
-        { url: FETCH_DAILY_MCOM, projectId: 18754737 }
-    ];
-
-    // Получаем вчерашнюю дату в формате YYYY-MM-DD
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const formattedDate = yesterday.toISOString().split('T')[0]; 
-
-    for (const { url, projectId } of reports) {
-        try {
-            await setSettingsBeforeFetch(projectId);
-
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ date: formattedDate }) 
-            });
-
-            if (!response.ok) {
-                throw new Error(`Ошибка запроса: ${response.statusText}`);
-            }
-
-            console.log(`✅ Успешный запрос: ${url} (Дата: ${formattedDate})`);
-        } catch (error) {
-            console.error(`❌ Ошибка запроса для ${url}:`, error.message);
-        }
-    }
-}
-
 
 async function fetchAllReports() {
     const urls = [
@@ -373,11 +323,6 @@ async function fetchAllReports() {
 cron.schedule('0 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
     setTimeout(fetchAllReports, 10000);
 }, { scheduled: true, timezone: "Asia/Tbilisi" });
-
-// cron.schedule('2 1 * * *', async () => {
-//     setTimeout(fetchDailyReports, 10000);
-// 	bot.telegram.sendMessage(1023702517, `<a href="${DAILY_REPORT_LINK}">🔗Дневной отчет</a> готов.`);
-// }, { scheduled: true, timezone: "Asia/Tbilisi" });
 
 cron.schedule('*/5 * * * *', async () => {
     try {
