@@ -417,19 +417,6 @@ cron.schedule(
   { scheduled: true, timezone: "Asia/Tbilisi" },
 );
 
-cron.schedule(
-  "*/5 * * * *",
-  async () => {
-    try {
-      await axios.get(SELF_URL);
-      console.log(`Пинг отправлен`);
-    } catch (error) {
-      console.error("Ошибка пинга:", error);
-    }
-  },
-  { scheduled: true, timezone: "Asia/Tbilisi" },
-);
-
 bot
   .launch()
   .then(() => console.log("Бот запущен и готов к работе!"))
